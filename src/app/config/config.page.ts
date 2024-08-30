@@ -10,17 +10,26 @@ import { MessagesModule } from 'primeng/messages';
   standalone: true,
   imports: [ChipsModule, Button, FormsModule, MessagesModule],
   template: `
-    <div class="p-8 flex flex-row w-full">
-      <input
-        type="text"
-        class="grow flex w-full"
-        pInputText
-        [(ngModel)]="cmd"
-      />
-      <p-button label="Submit" (click)="submit()" />
+    <div>
+      <div class="flex flex-row w-full">
+        <input
+          type="text"
+          class="grow flex w-full"
+          pInputText
+          [(ngModel)]="cmd"
+        />
+        <p-button label="Submit" (click)="submit()" />
+      </div>
+      <p class="text-sm italic">
+        'reload' to reload the initial character sheet
+      </p>
     </div>
   `,
   styles: `
+    :host {
+      @apply p-8 grid;
+    }
+
     p-button button {
       width: 100%;
     }
