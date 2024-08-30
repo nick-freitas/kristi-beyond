@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "dnd-custom": {
+    "kristi-beyond": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -19,7 +19,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/dnd-custom",
+            "outputPath": "dist/kristi-beyond",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -63,10 +63,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "dnd-custom:build:production"
+              "buildTarget": "kristi-beyond:build:production"
             },
             "development": {
-              "buildTarget": "dnd-custom:build:development"
+              "buildTarget": "kristi-beyond:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -74,7 +74,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "dnd-custom:build"
+            "buildTarget": "kristi-beyond:build"
           }
         },
         "test": {
