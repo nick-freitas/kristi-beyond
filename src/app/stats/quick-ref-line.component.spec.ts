@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { JournalLayout } from './journal.layout';
+import { QuickRefLineComponent } from './quick-ref-line.component';
 
-describe('JournalLayout', () => {
-  let component: JournalLayout;
-  let fixture: ComponentFixture<JournalLayout>;
+describe('QuickRefLineComponent', () => {
+  let component: QuickRefLineComponent;
+  let fixture: ComponentFixture<QuickRefLineComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [JournalLayout]
+      imports: [QuickRefLineComponent]
     })
     .compileComponents();
-    
-    fixture = TestBed.createComponent(JournalLayout);
+
+    fixture = TestBed.createComponent(QuickRefLineComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

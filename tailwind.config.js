@@ -4,8 +4,8 @@ module.exports = {
   theme: {
     extend: {
       backgroundImage: {
-        journalPages: "url('/assets/journal_layout_background.jpg')",
-        appBackground: "url('/assets/fantasy_tarot.webp')",
+        appBackground: "url('/assets/app-background.jpg')",
+        journalPages: "url('/assets/journal-background.jpg')",
       },
     },
   },

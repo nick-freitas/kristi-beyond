@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { StatsComponent } from './stats.component';
+import { TopLineComponent } from './top-line.component';
 
-describe('StatsComponent', () => {
-  let component: StatsComponent;
-  let fixture: ComponentFixture<StatsComponent>;
+describe('TopLineComponent', () => {
+  let component: TopLineComponent;
+  let fixture: ComponentFixture<TopLineComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [StatsComponent]
+      imports: [TopLineComponent]
     })
     .compileComponents();
-    
-    fixture = TestBed.createComponent(StatsComponent);
+
+    fixture = TestBed.createComponent(TopLineComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
