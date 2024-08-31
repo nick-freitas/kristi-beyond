@@ -40,6 +40,13 @@ import { CharacterService } from '../core/character.service';
         <span>Target: A creature you try to touch</span>
         <span>Components: VS</span>
         <span>Duration: Instantaneous</span>
+        <span>
+          Hit: +{{
+            characterService.character().abilityModifiers.wis +
+              characterService.character().proficiency
+          }}
+        </span>
+        <span> Damage: 2d8 lightning </span>
       </div>
       <div>
         <span>
@@ -58,6 +65,13 @@ import { CharacterService } from '../core/character.service';
         <span>Target: A creature within range</span>
         <span>Components: VS</span>
         <span>Duration: Instantaneous</span>
+        <span>
+          Hit: +{{
+            characterService.character().abilityModifiers.wis +
+              characterService.character().proficiency
+          }}
+        </span>
+        <span>Damage: 2d8 cold</span>
       </div>
       <div>
         <span>
