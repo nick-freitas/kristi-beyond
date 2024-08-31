@@ -72,7 +72,7 @@ export class NavComponent implements OnInit {
       {
         label: 'Actions',
         route: 'actions',
-        disabled: true,
+        // disabled: true,
       },
       {
         label: 'Equipment',

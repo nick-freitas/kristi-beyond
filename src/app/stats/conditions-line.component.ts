@@ -10,7 +10,7 @@ import { CharacterService } from '../core/character.service';
   template: `
     <p-card header="Conditions" class="flex w-full">
       <div class="flex justify-around h-full w-full pb-8">
-        <div class="grid 2xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-2 grow">
+        <div class="grid 2xl:grid-cols-2 lg:grid-cols-1 md:grid-cols-1 grow">
           <p-button
             label="Blinded"
             [outlined]="true"
