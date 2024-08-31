@@ -47,8 +47,9 @@ import { CharacterService } from '../core/character.service';
       </div>
     </p-card>
     <p-card header="Initiative" class="">
-      <div class="flex flex-row gap-3 text-3xl justify-center">
+      <div class="flex flex-col gap-3 text-3xl justify-center items-center">
         <span> +{{ characterService.character().initiative }} </span>
+        <span> x2 Advantage </span>
       </div>
     </p-card>
   `,
