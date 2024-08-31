@@ -4,11 +4,12 @@ import { Button } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
 import { CharacterService } from '../core/character.service';
 import { MessagesModule } from 'primeng/messages';
+import { JsonPipe } from '@angular/common';
 
 @Component({
   selector: 'app-config',
   standalone: true,
-  imports: [ChipsModule, Button, FormsModule, MessagesModule],
+  imports: [ChipsModule, Button, FormsModule, MessagesModule, JsonPipe],
   template: `
     <div>
       <div class="flex flex-row w-full">
@@ -23,6 +24,9 @@ import { MessagesModule } from 'primeng/messages';
       <p class="text-sm italic">
         'reload' to reload the initial character sheet
       </p>
+    </div>
+    <div class="pt-16">
+      <pre>{{ characterService.character() | json }}</pre>
     </div>
   `,
   styles: `

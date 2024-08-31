@@ -253,10 +253,10 @@ import { MessagesModule } from 'primeng/messages';
           </div>
         </p-fieldset>
         <p-fieldset legend="ASI (Level 4)" [toggleable]="true">
-          <p>+1 Wisdom / +1 Constitution</p>
+          <p>+1 Wisdom / +1 Dexterity</p>
         </p-fieldset>
         <p-fieldset legend="ASI (Level 8)" [toggleable]="true">
-          <p>+1 Wisdom / +1 Constitution</p>
+          <p>+1 Wisdom / +1 Charisma</p>
         </p-fieldset>
       </div>
     </p-card>
