@@ -85,7 +85,6 @@ export class NavComponent implements OnInit {
       {
         label: 'Cards',
         route: 'cards',
-        // disabled: true,
       },
       {
         label: 'Guides',
