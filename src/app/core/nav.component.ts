@@ -72,6 +72,7 @@ export class NavComponent implements OnInit {
       {
         label: 'Actions',
         route: 'actions',
+        disabled: true,
       },
       {
         label: 'Equipment',
@@ -84,10 +85,12 @@ export class NavComponent implements OnInit {
       {
         label: 'Cards',
         route: 'cards',
+        disabled: true,
       },
       {
         label: 'Guides',
         route: 'guides',
+        disabled: true,
       },
       {
         label: 'Configs',

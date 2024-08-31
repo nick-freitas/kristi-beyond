@@ -11,6 +11,9 @@ import { CharacterService } from '../core/character.service';
       <div class="flex flex-row gap-3 text-3xl justify-center">
         <span> {{ characterService.character().ac }} </span>
       </div>
+      <div class="text-center pt-4">
+        <span>10 + Dex + Armour + Cloak + Shield</span>
+      </div>
     </p-card>
     <p-card header="Speed" class="">
       <div class="flex flex-col gap-3 text-3xl justify-center items-center">

@@ -1,568 +1,264 @@
 import {
   computed,
-  inject,
   Injectable,
+  isDevMode,
   Signal,
   signal,
   WritableSignal,
 } from '@angular/core';
 import { sumReducer } from './utils';
-
-const initialCharacter: SourceCharacterState = {
-  name: 'Vasha Taltos',
-  race: 'Reborn Vistani',
-  background: 'Hermit',
-  alignment: 'UK',
-  inspiration: 0,
-  additionalInventory: '',
-  classes: [
-    {
-      class: 'Wild Oracle',
-      subclass: 'Fate of the Chosen',
-      level: 10,
-      hitDie: 8,
-    },
-  ],
-  rolledStats: {
-    str: 12,
-    dex: 13,
-    con: 13,
-    int: 9,
-    wis: 15,
-    cha: 9,
-  },
-  featureUsages: {
-    pastKnowledge: 0,
-    sharedDestiny: 0,
-    scry: 0,
-    convergentReturn: 0,
-    telepathicDetectThoughts: 0,
-  },
-  currentHp: undefined,
-  currentHitDie: undefined,
-  hitDieType: 'd8',
-  conditions: {},
-  overrideAbilityScores: {},
-  asis: [
-    { level: 4, wis: 1, con: 1 },
-    { level: 8, wis: 1, con: 1 },
-  ],
-  saveProficiencies: {
-    wis: true,
-    cha: true,
-  },
-  feats: [
-    {
-      level: 1,
-      name: 'Telepathic',
-      description: `
-          You awaken the ability to mentally connect with others, granting you the following benefits:
-
-          * Increase your Intelligence, Wisdom, or Charisma score by 1, to a maximum of 20.
-          * You can speak telepathically to any creature you can see within 60 feet of you. Your telepathic utterances are in a language you know, and the creature understands you only if it knows that language. Your communication doesn't give the creature the ability to respond to you telepathically.
-          * You can cast the Detect Thoughts spell, requiring no spell slot or components, and you must finish a long rest before you can cast it this way again. Your spellcasting ability for the spell is the ability increased by this feat. If you have spell slots of 2nd level or higher, you can cast this spell with them.
-          `,
-      asi: 'wis',
-    },
-  ],
-  languages: ['Common', 'Sylvan', 'Orcish', 'Telepathic (60ft)'],
-  tools: ['Herbalism Kit', "Calligrapher's Set", 'Playing Cards'],
-  armourProficiencies: ['Light Armour'],
-  weaponProficiencies: [
-    'Simple Weapons',
-    'Hand Crossbows',
-    'Heavy Crossbows',
-    'Glaives',
-    'Whips',
-    'Shortswords',
-  ],
-  tempHp: 0,
-  speeds: { land: 30, swim: 15, climb: 15 },
-  resistances: { poison: true },
-  immunities: { magicalSleep: true },
-  advantages: {
-    deathSaves: true,
-    diseasePoison: true,
-  },
-  rolledHP: [8, 5, 2, 6, 8, 4, 2, 6, 3, 2],
-  maxHpModifier: 0,
-  maxHpOverride: 0,
-  skillProficiencies: {
-    arcana: true, //wild oracle
-    insight: true, //wild oracle
-    investigation: true, //reborn
-    medicine: true, //hermit
-    persuasion: true, //reborn
-    religion: true, //hermit
-  },
-  racialAsis: {
-    con: 1,
-    int: 1,
-    wis: 1,
-  },
-  equippedArmourType: 'Leather',
-  deathSaves: [],
-  wealth: {
-    gold: 1950,
-    silver: 0,
-    copper: 0,
-  },
-  inventory: [
-    {
-      qty: 1,
-      name: 'Leather Armour',
-      notes: 'Light, AC 11',
-      type: '',
-      weight: 10,
-      value: 0,
-      requiresAttunement: false,
-    },
-    {
-      qty: 1,
-      name: "Explorer's Pack",
-      notes:
-        'Backpack,bedroll,mess kit,tinderbox,torch (10),rations (10),waterskin,hempen rope',
-      type: '',
-      weight: 0,
-      value: 0,
-      requiresAttunement: false,
-    },
-    {
-      qty: 1,
-      name: 'Glaive',
-      notes: 'Marial, Melee, Heavy, Reach, Two-Handed',
-      type: '',
-      weight: 6,
-      value: 0,
-      requiresAttunement: false,
-    },
-    {
-      qty: 1,
-      name: 'Wild Tarot Deck',
-      notes: '',
-      type: '',
-      weight: 0,
-      value: 0,
-      requiresAttunement: false,
-    },
-    {
-      qty: 2,
-      name: 'Greater Potions of Healing',
-      notes: 'Potion, Healing, Consumable, 4d4 + 4',
-      type: '',
-      weight: 0,
-      value: 0,
-      requiresAttunement: false,
-    },
-  ],
-};
-
-type SourceCharacterState = {
-  name: string;
-  race: string;
-  background: string;
-  alignment: string;
-  classes: {
-    class: string;
-    subclass: string;
-    level: number;
-    hitDie: number;
-  }[];
-  additionalInventory: string;
-  featureUsages: {
-    telepathicDetectThoughts: number;
-    pastKnowledge: number;
-    sharedDestiny: number;
-    scry: number;
-    convergentReturn: number;
-  };
-  inspiration: number;
-  tempHp: number;
-  currentHp: number | undefined;
-  currentHitDie: number | undefined;
-  hitDieType: string;
-  deathSaves: boolean[];
-  rolledStats: {
-    str: number;
-    dex: number;
-    con: number;
-    int: number;
-    wis: number;
-    cha: number;
-  };
-  asis: {
-    level: number;
-    str?: number;
-    dex?: number;
-    con?: number;
-    int?: number;
-    wis?: number;
-    cha?: number;
-  }[];
-  feats: {
-    level: number;
-    name: string;
-    description: string;
-    asi: string;
-  }[];
-
-  languages: string[];
-  tools: string[];
-  speeds: {
-    land: number;
-    burrow?: number;
-    climb?: number;
-    fly?: number;
-    swim?: number;
-  };
-  resistances: {
-    poison?: boolean;
-    magicalSleep?: boolean;
-  };
-  immunities: {
-    poison?: boolean;
-    magicalSleep?: boolean;
-  };
-  advantages: {
-    deathSaves?: boolean;
-    diseasePoison?: boolean;
-  };
-  rolledHP: number[];
-  maxHpModifier: number;
-  maxHpOverride: number;
-  skillProficiencies: {
-    acrobatics?: boolean;
-    animalHandling?: boolean;
-    arcana?: boolean;
-    athletics?: boolean;
-    deception?: boolean;
-    history?: boolean;
-    insight?: boolean;
-    intimidation?: boolean;
-    investigation?: boolean;
-    medicine?: boolean;
-    nature?: boolean;
-    perception?: boolean;
-    performance?: boolean;
-    persuasion?: boolean;
-    religion?: boolean;
-    sleightOfHand?: boolean;
-    stealth?: boolean;
-    survival?: boolean;
-  };
-  racialAsis: {
-    str?: number;
-    dex?: number;
-    con?: number;
-    int?: number;
-    wis?: number;
-    cha?: number;
-  };
-  saveProficiencies: {
-    str?: boolean;
-    dex?: boolean;
-    con?: boolean;
-    int?: boolean;
-    wis?: boolean;
-    cha?: boolean;
-  };
-  inventory: {
-    qty: number;
-    name: string;
-    value: number;
-    weight: number;
-    notes: string;
-    requiresAttunement: boolean;
-    type: string;
-  }[];
-  overrideAbilityScores: {
-    str?: number;
-    dex?: number;
-    con?: number;
-    int?: number;
-    wis?: number;
-    cha?: number;
-  };
-  armourProficiencies: string[];
-  weaponProficiencies: string[];
-  equippedArmourType: string;
-  wealth: {
-    gold: number;
-    silver: number;
-    copper: number;
-  };
-  conditions: {
-    blinded?: boolean;
-    charmed?: boolean;
-    deafened?: boolean;
-    frightened?: boolean;
-    grappled?: boolean;
-    incapacitated?: boolean;
-    invisible?: boolean;
-    paralyzed?: boolean;
-    petrified?: boolean;
-    poisoned?: boolean;
-    prone?: boolean;
-    restrained?: boolean;
-    stunned?: boolean;
-    unconscious?: boolean;
-    magicalSleep?: boolean;
-    exhaustion?: number;
-  };
-};
-
-type CharacterState = SourceCharacterState & {
-  totalLevel: number;
-  abilityScores: {
-    str: number;
-    dex: number;
-    con: number;
-    int: number;
-    wis: number;
-    cha: number;
-  };
-  abilityModifiers: {
-    str: number;
-    dex: number;
-    con: number;
-    int: number;
-    wis: number;
-    cha: number;
-  };
-  deathFails: number;
-  deathPasses: number;
-  totalInitialHP: number;
-  totalMaxHP: number;
-  ac: number;
-  proficiency: number;
-  initiative: number;
-  passives: {
-    investigation: number;
-    perception: number;
-    insight: number;
-  };
-  saveModifiers: {
-    str: number;
-    dex: number;
-    con: number;
-    int: number;
-    wis: number;
-    cha: number;
-  };
-  skillModifiers: {
-    acrobatics: number;
-    animalHandling: number;
-    arcana: number;
-    athletics: number;
-    deception: number;
-    history: number;
-    insight: number;
-    intimidation: number;
-    investigation: number;
-    medicine: number;
-    nature: number;
-    perception: number;
-    performance: number;
-    persuasion: number;
-    religion: number;
-    sleightOfHand: number;
-    stealth: number;
-    survival: number;
-  };
-};
+import {
+  Inventory,
+  SourceCharacterState,
+} from './source-character-state.model';
+import { CharacterState } from './character-state.model';
+import { initialCharacter } from './initial-character.data';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CharacterService {
-  public readonly errors: WritableSignal<string | null> = signal(null);
-  private readonly sourceState$$: WritableSignal<SourceCharacterState> =
-    signal(initialCharacter);
-  public readonly character: Signal<CharacterState> = computed(() => {
-    const character = this.sourceState$$();
-    const totalLevel = sumReducer(
-      character.classes.map((c) => c.level).filter((x) => x),
-    );
-
-    // if (character.rolledHP.length !== totalLevel) {
-    //   this.errors.set(
-    //     `Expected list of Rolled HP to match character level; saw ${character.rolledHP.length} but expected ${totalLevel}`,
-    //   );
-    // }
-
-    let abilityScores = this.calcAbilityScores(
-      character.rolledStats,
-      character.racialAsis,
-      character.feats,
-      character.asis,
-    );
-    abilityScores = {
-      str: character.overrideAbilityScores.str
-        ? character.overrideAbilityScores.str
-        : abilityScores.str,
-      dex: character.overrideAbilityScores.dex
-        ? character.overrideAbilityScores.dex
-        : abilityScores.dex,
-      con: character.overrideAbilityScores.con
-        ? character.overrideAbilityScores.con
-        : abilityScores.con,
-      int: character.overrideAbilityScores.int
-        ? character.overrideAbilityScores.int
-        : abilityScores.int,
-      wis: character.overrideAbilityScores.wis
-        ? character.overrideAbilityScores.wis
-        : abilityScores.wis,
-      cha: character.overrideAbilityScores.cha
-        ? character.overrideAbilityScores.cha
-        : abilityScores.cha,
-    };
-
-    const abilityModifiers = {
-      str: this.calcModifier(abilityScores.str),
-      dex: this.calcModifier(abilityScores.dex),
-      con: this.calcModifier(abilityScores.con),
-      int: this.calcModifier(abilityScores.int),
-      wis: this.calcModifier(abilityScores.wis),
-      cha: this.calcModifier(abilityScores.cha),
-    };
-
-    const totalInitialHP = sumReducer(
-      character.rolledHP.filter((x) => x).map((x) => x + abilityModifiers.con),
-    );
-
-    // if (totalInitialHP <= 0) {
-    //   this.errors.set(`Rolled HP plus Con Modifier is less than or equal to 0`);
-    // }
-
-    const totalMaxHP = character.maxHpOverride
-      ? character.maxHpOverride
-      : totalInitialHP + character.maxHpModifier;
-
-    if (character.currentHp === undefined) character.currentHp = totalMaxHP;
-    if (character.currentHp! > totalMaxHP) character.currentHp = totalMaxHP;
-
-    let ac = this.getAcBaseFromArmour(character.equippedArmourType);
-    const maxDexMod = this.getMaxDexFromArmour(character.equippedArmourType);
-    const dexMod = Math.min(abilityModifiers.dex, maxDexMod);
-    ac += dexMod;
-
-    const proficiency = this.calcProficiencyModifier(totalLevel);
-
-    const saveModifiers = {
-      str:
-        abilityModifiers.str +
-        (character.saveProficiencies.str ? proficiency : 0),
-      dex:
-        abilityModifiers.dex +
-        (character.saveProficiencies.dex ? proficiency : 0),
-      con:
-        abilityModifiers.con +
-        (character.saveProficiencies.con ? proficiency : 0),
-      int:
-        abilityModifiers.int +
-        (character.saveProficiencies.int ? proficiency : 0),
-      wis:
-        abilityModifiers.wis +
-        (character.saveProficiencies.wis ? proficiency : 0),
-      cha:
-        abilityModifiers.cha +
-        (character.saveProficiencies.cha ? proficiency : 0),
-    };
-
-    const skillModifiers = {
-      acrobatics:
-        abilityModifiers.dex +
-        (character.skillProficiencies.acrobatics ? proficiency : 0),
-      animalHandling:
-        abilityModifiers.wis +
-        (character.skillProficiencies.animalHandling ? proficiency : 0),
-      arcana:
-        abilityModifiers.int +
-        (character.skillProficiencies.arcana ? proficiency : 0),
-      athletics:
-        abilityModifiers.str +
-        (character.skillProficiencies.athletics ? proficiency : 0),
-      deception:
-        abilityModifiers.cha +
-        (character.skillProficiencies.deception ? proficiency : 0),
-      history:
-        abilityModifiers.int +
-        (character.skillProficiencies.history ? proficiency : 0),
-      insight:
-        abilityModifiers.wis +
-        (character.skillProficiencies.insight ? proficiency : 0),
-      intimidation:
-        abilityModifiers.cha +
-        (character.skillProficiencies.intimidation ? proficiency : 0),
-      investigation:
-        abilityModifiers.int +
-        (character.skillProficiencies.investigation ? proficiency : 0),
-      medicine:
-        abilityModifiers.wis +
-        (character.skillProficiencies.medicine ? proficiency : 0),
-      nature:
-        abilityModifiers.int +
-        (character.skillProficiencies.nature ? proficiency : 0),
-      perception:
-        abilityModifiers.wis +
-        (character.skillProficiencies.perception ? proficiency : 0),
-      performance:
-        abilityModifiers.cha +
-        (character.skillProficiencies.performance ? proficiency : 0),
-      persuasion:
-        abilityModifiers.cha +
-        (character.skillProficiencies.persuasion ? proficiency : 0),
-      religion:
-        abilityModifiers.int +
-        (character.skillProficiencies.religion ? proficiency : 0),
-      sleightOfHand:
-        abilityModifiers.dex +
-        (character.skillProficiencies.sleightOfHand ? proficiency : 0),
-      stealth:
-        abilityModifiers.dex +
-        (character.skillProficiencies.stealth ? proficiency : 0),
-      survival:
-        abilityModifiers.wis +
-        (character.skillProficiencies.survival ? proficiency : 0),
-    };
-
-    const passives = {
-      investigation: 10 + skillModifiers.investigation,
-      perception: 10 + skillModifiers.perception,
-      insight: 10 + skillModifiers.insight,
-    };
-
-    const deathFails = character.deathSaves.filter((x) => !x).length;
-    const deathPasses = character.deathSaves.filter((x) => x).length;
-
-    if (character.currentHitDie === undefined)
-      character.currentHitDie = totalLevel;
-
-    localStorage.setItem('character', JSON.stringify(character));
-
-    return {
-      ...character,
-      totalLevel,
-      abilityScores,
-      abilityModifiers,
-      totalInitialHP,
-      totalMaxHP,
-      ac,
-      proficiency,
-      initiative: abilityModifiers.dex,
-      saveModifiers,
-      skillModifiers,
-      passives,
-      deathFails,
-      deathPasses,
-    };
-  });
+  private readonly sourceState$$: WritableSignal<SourceCharacterState>;
+  public readonly character: Signal<CharacterState>;
 
   constructor() {
-    const savedCharacter = localStorage.getItem('character');
+    let savedCharacter = localStorage.getItem('character');
+    if (isDevMode()) savedCharacter = null;
+
     if (savedCharacter) {
-      this.sourceState$$.set(JSON.parse(savedCharacter));
+      this.sourceState$$ = signal(JSON.parse(savedCharacter));
+    } else {
+      this.sourceState$$ = signal(initialCharacter);
     }
+
+    this.character = computed(() => {
+      const character = this.sourceState$$();
+      const totalLevel = sumReducer(
+        character.classes.map((c) => c.level).filter((x) => x),
+      );
+
+      const proficiency = this.calcProficiencyModifier(totalLevel);
+      let equipped = character.inventory.filter((i) => i.equipped);
+
+      // if (character.rolledHP.length !== totalLevel) {
+      //   this.errors.set(
+      //     `Expected list of Rolled HP to match character level; saw ${character.rolledHP.length} but expected ${totalLevel}`,
+      //   );
+      // }
+
+      let abilityScores = this.calcAbilityScores(
+        character.rolledStats,
+        character.racialAsis,
+        character.feats,
+        character.asis,
+      );
+
+      const gearOverrides = this.getGearMods(equipped)
+        .map((e) => e.overrideAbilityScore)
+        .filter((e) => e);
+      for (const override of gearOverrides) {
+        if (override) {
+          for (const attr of Object.keys(override)) {
+            // @ts-ignore
+            abilityScores[attr] = override[attr];
+          }
+        }
+      }
+
+      abilityScores = {
+        str: character.overrideAbilityScores.str
+          ? character.overrideAbilityScores.str
+          : abilityScores.str,
+        dex: character.overrideAbilityScores.dex
+          ? character.overrideAbilityScores.dex
+          : abilityScores.dex,
+        con: character.overrideAbilityScores.con
+          ? character.overrideAbilityScores.con
+          : abilityScores.con,
+        int: character.overrideAbilityScores.int
+          ? character.overrideAbilityScores.int
+          : abilityScores.int,
+        wis: character.overrideAbilityScores.wis
+          ? character.overrideAbilityScores.wis
+          : abilityScores.wis,
+        cha: character.overrideAbilityScores.cha
+          ? character.overrideAbilityScores.cha
+          : abilityScores.cha,
+      };
+
+      const abilityModifiers = {
+        str: this.calcModifier(abilityScores.str),
+        dex: this.calcModifier(abilityScores.dex),
+        con: this.calcModifier(abilityScores.con),
+        int: this.calcModifier(abilityScores.int),
+        wis: this.calcModifier(abilityScores.wis),
+        cha: this.calcModifier(abilityScores.cha),
+      };
+
+      equipped = equipped.map((i) => {
+        i.itemSpecific.attackMod = 0;
+        if (i.itemSpecific.attackModStat) {
+          i.itemSpecific.attackMod +=
+            // @ts-ignore
+            abilityModifiers[i.itemSpecific.attackModStat];
+        }
+
+        if (i.itemSpecific.proficient) {
+          i.itemSpecific.attackMod += proficiency;
+        }
+
+        i.itemSpecific.damageMod =
+          // @ts-ignore
+          abilityModifiers[i.itemSpecific.attackModStat];
+
+        return { ...i };
+      });
+
+      const totalInitialHP = sumReducer(
+        character.rolledHP
+          .filter((x) => x)
+          .map((x) => x + abilityModifiers.con),
+      );
+
+      // if (totalInitialHP <= 0) {
+      //   this.errors.set(`Rolled HP plus Con Modifier is less than or equal to 0`);
+      // }
+
+      const totalMaxHP = character.maxHpOverride
+        ? character.maxHpOverride
+        : totalInitialHP + character.maxHpModifier;
+
+      if (character.currentHp === undefined) character.currentHp = totalMaxHP;
+      if (character.currentHp! > totalMaxHP) character.currentHp = totalMaxHP;
+
+      let saveModifiers = {
+        str:
+          abilityModifiers.str +
+          (character.saveProficiencies.str ? proficiency : 0),
+        dex:
+          abilityModifiers.dex +
+          (character.saveProficiencies.dex ? proficiency : 0),
+        con:
+          abilityModifiers.con +
+          (character.saveProficiencies.con ? proficiency : 0),
+        int:
+          abilityModifiers.int +
+          (character.saveProficiencies.int ? proficiency : 0),
+        wis:
+          abilityModifiers.wis +
+          (character.saveProficiencies.wis ? proficiency : 0),
+        cha:
+          abilityModifiers.cha +
+          (character.saveProficiencies.cha ? proficiency : 0),
+      };
+
+      const skillModifiers = {
+        acrobatics:
+          abilityModifiers.dex +
+          (character.skillProficiencies.acrobatics ? proficiency : 0),
+        animalHandling:
+          abilityModifiers.wis +
+          (character.skillProficiencies.animalHandling ? proficiency : 0),
+        arcana:
+          abilityModifiers.int +
+          (character.skillProficiencies.arcana ? proficiency : 0),
+        athletics:
+          abilityModifiers.str +
+          (character.skillProficiencies.athletics ? proficiency : 0),
+        deception:
+          abilityModifiers.cha +
+          (character.skillProficiencies.deception ? proficiency : 0),
+        history:
+          abilityModifiers.int +
+          (character.skillProficiencies.history ? proficiency : 0),
+        insight:
+          abilityModifiers.wis +
+          (character.skillProficiencies.insight ? proficiency : 0),
+        intimidation:
+          abilityModifiers.cha +
+          (character.skillProficiencies.intimidation ? proficiency : 0),
+        investigation:
+          abilityModifiers.int +
+          (character.skillProficiencies.investigation ? proficiency : 0),
+        medicine:
+          abilityModifiers.wis +
+          (character.skillProficiencies.medicine ? proficiency : 0),
+        nature:
+          abilityModifiers.int +
+          (character.skillProficiencies.nature ? proficiency : 0),
+        perception:
+          abilityModifiers.wis +
+          (character.skillProficiencies.perception ? proficiency : 0),
+        performance:
+          abilityModifiers.cha +
+          (character.skillProficiencies.performance ? proficiency : 0),
+        persuasion:
+          abilityModifiers.cha +
+          (character.skillProficiencies.persuasion ? proficiency : 0),
+        religion:
+          abilityModifiers.int +
+          (character.skillProficiencies.religion ? proficiency : 0),
+        sleightOfHand:
+          abilityModifiers.dex +
+          (character.skillProficiencies.sleightOfHand ? proficiency : 0),
+        stealth:
+          abilityModifiers.dex +
+          (character.skillProficiencies.stealth ? proficiency : 0),
+        survival:
+          abilityModifiers.wis +
+          (character.skillProficiencies.survival ? proficiency : 0),
+      };
+
+      const passives = {
+        investigation: 10 + skillModifiers.investigation,
+        perception: 10 + skillModifiers.perception,
+        insight: 10 + skillModifiers.insight,
+      };
+
+      const deathFails = character.deathSaves.filter((x) => !x).length;
+      const deathPasses = character.deathSaves.filter((x) => x).length;
+
+      const gearModAC = sumReducer(this.getGearMods(equipped).map((m) => m.ac));
+      const gearAcOffset = sumReducer(
+        this.getGearMods(equipped).map((m) => m.acOffset),
+      );
+
+      // Dex Mod; find a way to combine equippedArmourType with inventory
+      const maxDexMod = this.getMaxDexFromArmour(character.equippedArmourType);
+      const dexMod = Math.min(abilityModifiers.dex, maxDexMod);
+      const ac = 10 + dexMod + gearModAC + gearAcOffset;
+
+      const totalToAllSaveMods = sumReducer(
+        this.getGearMods(equipped).map((m) => m.saveMod),
+      );
+      for (const key of Object.keys(saveModifiers)) {
+        // @ts-ignore
+        saveModifiers[key] += totalToAllSaveMods;
+      }
+
+      if (character.currentHitDie === undefined)
+        character.currentHitDie = totalLevel;
+
+      localStorage.setItem('character', JSON.stringify(character));
+
+      return {
+        ...character,
+        totalLevel,
+        abilityScores,
+        abilityModifiers,
+        totalInitialHP,
+        totalMaxHP,
+        ac,
+        proficiency,
+        initiative: abilityModifiers.dex,
+        saveModifiers,
+        skillModifiers,
+        passives,
+        deathFails,
+        deathPasses,
+        equipped,
+      };
+    });
   }
 
   private calcAbilityScores(
@@ -667,6 +363,13 @@ export class CharacterService {
           ? 0
           : (character.currentHp || 0) - health,
     }));
+  }
+
+  getGearMods(equipped: Inventory[]) {
+    return equipped
+      .filter((e) => e.equipped)
+      .filter((e) => !e.requiresAttunement || e.isAttuned)
+      .map((e) => e.itemSpecific);
   }
 
   calcModifier(score: number) {
@@ -797,6 +500,10 @@ export class CharacterService {
     this.sourceState$$.update((c) => ({
       ...c,
       wealth: { ...c.wealth, gold: c.wealth.gold + change },
+      wealthTransaction: {
+        ...c.wealthTransaction,
+        gold: [change, ...c.wealthTransaction.gold],
+      },
     }));
   }
 
@@ -804,6 +511,10 @@ export class CharacterService {
     this.sourceState$$.update((c) => ({
       ...c,
       wealth: { ...c.wealth, silver: c.wealth.silver + change },
+      wealthTransaction: {
+        ...c.wealthTransaction,
+        silver: [change, ...c.wealthTransaction.silver],
+      },
     }));
   }
 
@@ -811,6 +522,10 @@ export class CharacterService {
     this.sourceState$$.update((c) => ({
       ...c,
       wealth: { ...c.wealth, copper: c.wealth.copper + change },
+      wealthTransaction: {
+        ...c.wealthTransaction,
+        copper: [change, ...c.wealthTransaction.copper],
+      },
     }));
   }
 
@@ -903,6 +618,33 @@ export class CharacterService {
         ...c.featureUsages,
         telepathicDetectThoughts: c.featureUsages.telepathicDetectThoughts + 1,
       },
+    }));
+  }
+
+  unattune(item: Inventory) {
+    item.isAttuned = false;
+    this.updateInventory(item);
+  }
+
+  attune(item: Inventory) {
+    item.isAttuned = true;
+    this.updateInventory(item);
+  }
+
+  unequip(item: any) {
+    item.equipped = false;
+    this.updateInventory(item);
+  }
+
+  equip(item: any) {
+    item.equipped = true;
+    this.updateInventory(item);
+  }
+
+  updateInventory(item: Inventory) {
+    this.sourceState$$.update((c) => ({
+      ...c,
+      inventory: [...c.inventory.map((i) => (i.name === item.name ? item : i))],
     }));
   }
 }

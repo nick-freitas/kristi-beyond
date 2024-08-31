@@ -5,7 +5,7 @@ import { MessagesModule } from 'primeng/messages';
   selector: 'app-actions',
   standalone: true,
   imports: [MessagesModule],
-  template: ` <p>actions works!</p> `,
+  template: ` <span class="text-4xl pt-8">No</span> `,
   styles: `
     :host {
       @apply p-8 gap-8 grid;
