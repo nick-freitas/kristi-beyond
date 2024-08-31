@@ -51,6 +51,7 @@ export type SourceCharacterState = {
     sharedDestiny: number;
     scry: number;
     convergentReturn: number;
+    creepingHand: number;
   };
   inspiration: number;
   tempHp: number;

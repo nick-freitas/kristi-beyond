@@ -238,6 +238,7 @@ export const initialCharacter: SourceCharacterState = {
     scry: 0,
     convergentReturn: 0,
     telepathicDetectThoughts: 0,
+    creepingHand: 0,
   },
   currentHp: undefined,
   currentHitDie: undefined,
