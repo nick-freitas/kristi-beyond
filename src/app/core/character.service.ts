@@ -581,6 +581,16 @@ export class CharacterService {
     }));
   }
 
+  creepHand() {
+    this.sourceState$$.update((c) => ({
+      ...c,
+      featureUsages: {
+        ...c.featureUsages,
+        creepingHand: c.featureUsages.creepingHand + 1,
+      },
+    }));
+  }
+
   convergentReturn() {
     this.sourceState$$.update((c) => ({
       ...c,

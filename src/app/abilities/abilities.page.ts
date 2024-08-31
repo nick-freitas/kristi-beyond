@@ -10,6 +10,33 @@ import { MessagesModule } from 'primeng/messages';
   standalone: true,
   imports: [CardModule, FieldsetModule, Button, MessagesModule],
   template: `
+    <p-card header="Campaign Specifics">
+      <div class="grid gap-8">
+        <p-fieldset
+          legend="Charm of Creeping Hand (Supernatural Gift/Charm)"
+          [toggleable]="true"
+        >
+          <p>
+            Once per turn, when you hit a creature with an attack roll using a
+            weapon or an unarmed strike, you can infuse your strike with
+            life-stealing energy. Your attack then deals an extra 1d10 necrotic
+            damage, and you gain 5 temporary hit points. Once used five times,
+            the charm vanishes.
+          </p>
+
+          <div class="pt-8">
+            <p-button
+              (click)="characterService.creepHand()"
+              [disabled]="
+                characterService.character().featureUsages.creepingHand >= 5
+              "
+            >
+              {{ characterService.character().featureUsages.creepingHand }} / 5
+            </p-button>
+          </div>
+        </p-fieldset>
+      </div>
+    </p-card>
     <p-card header="Class Abilities">
       <div class="grid gap-8">
         <p-fieldset legend="Scrying (Level 2)" [toggleable]="true">
