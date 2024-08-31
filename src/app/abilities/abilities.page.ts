@@ -166,6 +166,35 @@ import { MessagesModule } from 'primeng/messages';
     </p-card>
     <p-card header="Racial Abilities">
       <div class="grid gap-8">
+        <p-fieldset legend="Touch of Death" [toggleable]="true">
+          <p>
+            Your touch is pain, harming whoever you come in contact with. The
+            deathly power within you is beyond your control, afflicting any who
+            touch your bare skin. By the same token, you can deliver death to
+            your enemies with your touch.
+          </p>
+          <p class="pt-4">
+            You're the harbinger of a grim prophecy. Any creature your touch
+            damages is marked with a temporary scar of a group, fiend, deity, or
+            other force that takes an interest in you.
+          </p>
+          <p class="pt-8">
+            <b>Death Touch</b> You can focus your deadly touch against your
+            foes. As an action, make one unarmed strike. On a hit, the target
+            takes an additional 1d10 necrotic damage. This damage increases by
+            1d10 when you reach 5th level (2d10), 11th level (3d10), and 17th
+            level (4d10). <b>Damage</b> 2d10
+          </p>
+          <p class="pt-4">
+            <b>Inescapable Death</b> When you hit a target with an attack roll
+            and deal necrotic damage, you ignore the target's resistance to that
+            damage.
+          </p>
+          <p class="pt-4">
+            <b>Withering Contact</b> When you start your turn grappling a
+            creature or grappled by it, the creature takes 1d10 necrotic damage.
+          </p>
+        </p-fieldset>
         <p-fieldset legend="Faded Memories" [toggleable]="true">
           <p>
             Reborn suffer from some manner of discontinuity, an interruption of
