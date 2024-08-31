@@ -45,7 +45,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
               <span> Shield: {{ item.name }} </span>
               <!--            <span> Type: {{ item.itemSpecific.armourType }} </span>-->
               <span> AC: {{ item.itemSpecific.ac }} </span>
-              <span> Strength: {{ item.itemSpecific.str }} </span>
+              <!--              <span> Strength: {{ item.itemSpecific.str }} </span>-->
               <span>
                 Stealth Disadvantage:
                 {{ item.itemSpecific.stealthDis ? 'Yes' : 'No' }}
