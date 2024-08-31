@@ -139,6 +139,49 @@ import { MessagesModule } from 'primeng/messages';
     </p-card>
     <p-card header="Racial Abilities">
       <div class="grid gap-8">
+        <p-fieldset legend="Faded Memories" [toggleable]="true">
+          <p>
+            Reborn suffer from some manner of discontinuity, an interruption of
+            their lives or physical state that their minds are ill equipped to
+            deal with. Their memories of events before this interruption are
+            often vague or absent. Occasionally, the most unexpected experiences
+            might cause sensations or visions of the past to come rushing back.
+          </p>
+          <p class="pt-4">
+            Rather than sleeping, reborn regularly sit and dwell on the past,
+            hoping for some revelation of what came before. Most of the time,
+            these are dark, silent stretches. Occasionally, though, in a moment
+            of peace, stress, or excitement, a reborn gains a glimpse of what
+            came before. When you desire to have such a dreamlike vision, roll
+            on the Lost Memories table to inspire its details.
+          </p>
+          <ol class="list-decimal pl-8 pt-8">
+            <li>
+              You recall a physically painful moment. What mark or scar on your
+              body does it relate to?
+            </li>
+            <li>
+              A memory brings tears to your eyes. Is it a bitter or cheerful
+              memory? Does recalling it make you feel the same way?
+            </li>
+            <li>
+              You recall a childhood memory. What about that event or who you
+              were still influences you?
+            </li>
+            <li>
+              A memory brings with it the voice of someone once close to you.
+              How do they advise you?
+            </li>
+            <li>
+              You recall enjoying something that you can’t stand doing now. What
+              is it? Why don’t you like it now?
+            </li>
+            <li>
+              A memory carries a vivid smell or sensation. What are you going to
+              do to recreate that experience?
+            </li>
+          </ol>
+        </p-fieldset>
         <p-fieldset legend="Deathless Nature" [toggleable]="true">
           <p>
             You have escaped death, a fact represented by the following
