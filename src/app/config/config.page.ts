@@ -12,13 +12,8 @@ import { JsonPipe } from '@angular/common';
   imports: [ChipsModule, Button, FormsModule, MessagesModule, JsonPipe],
   template: `
     <div>
-      <div class="flex flex-row w-full">
-        <input
-          type="text"
-          class="grow flex w-full"
-          pInputText
-          [(ngModel)]="cmd"
-        />
+      <div class="flex flex-row ">
+        <input type="text" class="flex " pInputText [(ngModel)]="cmd" />
         <p-button label="Submit" (click)="submit()" />
       </div>
       <p class="text-sm italic">

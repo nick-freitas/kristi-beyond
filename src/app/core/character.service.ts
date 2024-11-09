@@ -12,7 +12,8 @@ import {
   SourceCharacterState,
 } from './source-character-state.model';
 import { CharacterState } from './character-state.model';
-import { initialCharacter } from './initial-character.data';
+import { initialCharacter } from '../data/initial-character.data';
+import { abilities, ability } from '../data/dnd5e.system.data';
 
 @Injectable({
   providedIn: 'root',
@@ -46,54 +47,60 @@ export class CharacterService {
       //   );
       // }
 
-      let abilityScores = this.calcAbilityScores(
+      let abilityScores: abilities<number> = this.calcAbilityScores(
         character.rolledStats,
         character.racialAsis,
-        character.feats,
-        character.asis,
+        character.feats.map((f) => f.asi),
+        character.asis as abilities<number>[],
       );
 
       const gearOverrides = this.getGearMods(equipped)
         .map((e) => e.overrideAbilityScore)
         .filter((e) => e);
+
       for (const override of gearOverrides) {
         if (override) {
           for (const attr of Object.keys(override)) {
             // @ts-ignore
-            abilityScores[attr] = override[attr];
+            if (override[attr]) {
+              // @ts-ignore
+              abilityScores[attr] = override[attr];
+            }
           }
         }
       }
 
       abilityScores = {
-        str: character.overrideAbilityScores.str
-          ? character.overrideAbilityScores.str
-          : abilityScores.str,
-        dex: character.overrideAbilityScores.dex
-          ? character.overrideAbilityScores.dex
-          : abilityScores.dex,
-        con: character.overrideAbilityScores.con
-          ? character.overrideAbilityScores.con
-          : abilityScores.con,
-        int: character.overrideAbilityScores.int
-          ? character.overrideAbilityScores.int
-          : abilityScores.int,
-        wis: character.overrideAbilityScores.wis
-          ? character.overrideAbilityScores.wis
-          : abilityScores.wis,
-        cha: character.overrideAbilityScores.cha
-          ? character.overrideAbilityScores.cha
-          : abilityScores.cha,
+        Strength: character.overrideAbilityScores.Strength
+          ? character.overrideAbilityScores.Strength
+          : abilityScores.Strength,
+        Dexterity: character.overrideAbilityScores.Dexterity
+          ? character.overrideAbilityScores.Dexterity
+          : abilityScores.Dexterity,
+        Constitution: character.overrideAbilityScores.Constitution
+          ? character.overrideAbilityScores.Constitution
+          : abilityScores.Constitution,
+        Intelligence: character.overrideAbilityScores.Intelligence
+          ? character.overrideAbilityScores.Intelligence
+          : abilityScores.Intelligence,
+        Wisdom: character.overrideAbilityScores.Wisdom
+          ? character.overrideAbilityScores.Wisdom
+          : abilityScores.Wisdom,
+        Charisma: character.overrideAbilityScores.Charisma
+          ? character.overrideAbilityScores.Charisma
+          : abilityScores.Charisma,
       };
 
-      const abilityModifiers = {
-        str: this.calcModifier(abilityScores.str),
-        dex: this.calcModifier(abilityScores.dex),
-        con: this.calcModifier(abilityScores.con),
-        int: this.calcModifier(abilityScores.int),
-        wis: this.calcModifier(abilityScores.wis),
-        cha: this.calcModifier(abilityScores.cha),
+      const abilityModifiers: abilities<number> = {
+        Strength: this.calcModifier(abilityScores.Strength),
+        Dexterity: this.calcModifier(abilityScores.Dexterity),
+        Constitution: this.calcModifier(abilityScores.Constitution),
+        Intelligence: this.calcModifier(abilityScores.Intelligence),
+        Wisdom: this.calcModifier(abilityScores.Wisdom),
+        Charisma: this.calcModifier(abilityScores.Charisma),
       };
+
+      console.log(abilityModifiers);
 
       equipped = equipped.map((i) => {
         i.itemSpecific.attackMod = 0;
@@ -117,7 +124,7 @@ export class CharacterService {
       const totalInitialHP = sumReducer(
         character.rolledHP
           .filter((x) => x)
-          .map((x) => x + abilityModifiers.con),
+          .map((x) => x + abilityModifiers.Constitution),
       );
 
       // if (totalInitialHP <= 0) {
@@ -131,81 +138,81 @@ export class CharacterService {
       if (character.currentHp === undefined) character.currentHp = totalMaxHP;
       if (character.currentHp! > totalMaxHP) character.currentHp = totalMaxHP;
 
-      let saveModifiers = {
-        str:
-          abilityModifiers.str +
-          (character.saveProficiencies.str ? proficiency : 0),
-        dex:
-          abilityModifiers.dex +
-          (character.saveProficiencies.dex ? proficiency : 0),
-        con:
-          abilityModifiers.con +
-          (character.saveProficiencies.con ? proficiency : 0),
-        int:
-          abilityModifiers.int +
-          (character.saveProficiencies.int ? proficiency : 0),
-        wis:
-          abilityModifiers.wis +
-          (character.saveProficiencies.wis ? proficiency : 0),
-        cha:
-          abilityModifiers.cha +
-          (character.saveProficiencies.cha ? proficiency : 0),
+      let saveModifiers: abilities<number> = {
+        Strength:
+          abilityModifiers.Strength +
+          (character.saveProficiencies.Strength ? proficiency : 0),
+        Dexterity:
+          abilityModifiers.Dexterity +
+          (character.saveProficiencies.Dexterity ? proficiency : 0),
+        Constitution:
+          abilityModifiers.Constitution +
+          (character.saveProficiencies.Constitution ? proficiency : 0),
+        Intelligence:
+          abilityModifiers.Intelligence +
+          (character.saveProficiencies.Intelligence ? proficiency : 0),
+        Wisdom:
+          abilityModifiers.Wisdom +
+          (character.saveProficiencies.Wisdom ? proficiency : 0),
+        Charisma:
+          abilityModifiers.Charisma +
+          (character.saveProficiencies.Charisma ? proficiency : 0),
       };
 
       const skillModifiers = {
         acrobatics:
-          abilityModifiers.dex +
+          abilityModifiers.Dexterity +
           (character.skillProficiencies.acrobatics ? proficiency : 0),
         animalHandling:
-          abilityModifiers.wis +
+          abilityModifiers.Wisdom +
           (character.skillProficiencies.animalHandling ? proficiency : 0),
         arcana:
-          abilityModifiers.int +
+          abilityModifiers.Intelligence +
           (character.skillProficiencies.arcana ? proficiency : 0),
         athletics:
-          abilityModifiers.str +
+          abilityModifiers.Strength +
           (character.skillProficiencies.athletics ? proficiency : 0),
         deception:
-          abilityModifiers.cha +
+          abilityModifiers.Charisma +
           (character.skillProficiencies.deception ? proficiency : 0),
         history:
-          abilityModifiers.int +
+          abilityModifiers.Intelligence +
           (character.skillProficiencies.history ? proficiency : 0),
         insight:
-          abilityModifiers.wis +
+          abilityModifiers.Wisdom +
           (character.skillProficiencies.insight ? proficiency : 0),
         intimidation:
-          abilityModifiers.cha +
+          abilityModifiers.Charisma +
           (character.skillProficiencies.intimidation ? proficiency : 0),
         investigation:
-          abilityModifiers.int +
+          abilityModifiers.Intelligence +
           (character.skillProficiencies.investigation ? proficiency : 0),
         medicine:
-          abilityModifiers.wis +
+          abilityModifiers.Wisdom +
           (character.skillProficiencies.medicine ? proficiency : 0),
         nature:
-          abilityModifiers.int +
+          abilityModifiers.Intelligence +
           (character.skillProficiencies.nature ? proficiency : 0),
         perception:
-          abilityModifiers.wis +
+          abilityModifiers.Wisdom +
           (character.skillProficiencies.perception ? proficiency : 0),
         performance:
-          abilityModifiers.cha +
+          abilityModifiers.Charisma +
           (character.skillProficiencies.performance ? proficiency : 0),
         persuasion:
-          abilityModifiers.cha +
+          abilityModifiers.Charisma +
           (character.skillProficiencies.persuasion ? proficiency : 0),
         religion:
-          abilityModifiers.int +
+          abilityModifiers.Intelligence +
           (character.skillProficiencies.religion ? proficiency : 0),
         sleightOfHand:
-          abilityModifiers.dex +
+          abilityModifiers.Dexterity +
           (character.skillProficiencies.sleightOfHand ? proficiency : 0),
         stealth:
-          abilityModifiers.dex +
+          abilityModifiers.Dexterity +
           (character.skillProficiencies.stealth ? proficiency : 0),
         survival:
-          abilityModifiers.wis +
+          abilityModifiers.Wisdom +
           (character.skillProficiencies.survival ? proficiency : 0),
       };
 
@@ -225,7 +232,7 @@ export class CharacterService {
 
       // Dex Mod; find a way to combine equippedArmourType with inventory
       const maxDexMod = this.getMaxDexFromArmour(character.equippedArmourType);
-      const dexMod = Math.min(abilityModifiers.dex, maxDexMod);
+      const dexMod = Math.min(abilityModifiers.Dexterity, maxDexMod);
       const ac = 10 + dexMod + gearModAC + gearAcOffset;
 
       const totalToAllSaveMods = sumReducer(
@@ -250,7 +257,7 @@ export class CharacterService {
         totalMaxHP,
         ac,
         proficiency,
-        initiative: abilityModifiers.dex,
+        initiative: abilityModifiers.Dexterity,
         saveModifiers,
         skillModifiers,
         passives,
@@ -262,70 +269,81 @@ export class CharacterService {
   }
 
   private calcAbilityScores(
-    rolledStats: any,
-    racialAsis: any,
-    feats: any[],
-    asis: any[],
-  ) {
-    let abilityScores = {
-      str: rolledStats.str,
-      dex: rolledStats.dex,
-      con: rolledStats.con,
-      int: rolledStats.int,
-      wis: rolledStats.wis,
-      cha: rolledStats.cha,
+    rolledStats: abilities<number>,
+    racialAsis: abilities<number | undefined>,
+    featAsis: ability[],
+    asis: abilities<number>[],
+  ): abilities<number> {
+    let abilityScores: abilities<number> = {
+      Strength: rolledStats.Strength,
+      Dexterity: rolledStats.Dexterity,
+      Constitution: rolledStats.Constitution,
+      Intelligence: rolledStats.Intelligence,
+      Wisdom: rolledStats.Wisdom,
+      Charisma: rolledStats.Charisma,
     };
 
     // racials
     abilityScores = {
-      str: abilityScores.str + (racialAsis.str || 0),
-      dex: abilityScores.dex + (racialAsis.dex || 0),
-      con: abilityScores.con + (racialAsis.con || 0),
-      int: abilityScores.int + (racialAsis.int || 0),
-      wis: abilityScores.wis + (racialAsis.wis || 0),
-      cha: abilityScores.cha + (racialAsis.cha || 0),
+      Strength: abilityScores.Strength + (racialAsis.Strength || 0),
+      Dexterity: abilityScores.Dexterity + (racialAsis.Dexterity || 0),
+      Constitution: abilityScores.Constitution + (racialAsis.Constitution || 0),
+      Intelligence: abilityScores.Intelligence + (racialAsis.Intelligence || 0),
+      Wisdom: abilityScores.Wisdom + (racialAsis.Wisdom || 0),
+      Charisma: abilityScores.Charisma + (racialAsis.Charisma || 0),
     };
 
     // feats
     abilityScores = {
-      str:
-        abilityScores.str +
-        (sumReducer(feats.filter((f) => f.asi === 'str').map((f) => 1)) || 0),
-      dex:
-        abilityScores.dex +
-        (sumReducer(feats.filter((f) => f.asi === 'dex').map((f) => 1)) || 0),
-      con:
-        abilityScores.con +
-        (sumReducer(feats.filter((f) => f.asi === 'con').map((f) => 1)) || 0),
-      int:
-        abilityScores.int +
-        (sumReducer(feats.filter((f) => f.asi === 'int').map((f) => 1)) || 0),
-      wis:
-        abilityScores.wis +
-        (sumReducer(feats.filter((f) => f.asi === 'wis').map((f) => 1)) || 0),
-      cha:
-        abilityScores.cha +
-        (sumReducer(feats.filter((f) => f.asi === 'cha').map((f) => 1)) || 0),
+      Strength:
+        abilityScores.Strength +
+        (featAsis.filter((a) => a === 'Strength')[0] ? 1 : 0),
+      Dexterity:
+        abilityScores.Dexterity +
+        (featAsis.filter((a) => a === 'Dexterity')[0] ? 1 : 0),
+      Constitution:
+        abilityScores.Constitution +
+        (featAsis.filter((a) => a === 'Constitution')[0] ? 1 : 0),
+      Intelligence:
+        abilityScores.Intelligence +
+        (featAsis.filter((a) => a === 'Intelligence')[0] ? 1 : 0),
+      Wisdom:
+        abilityScores.Wisdom +
+        (featAsis.filter((a) => a === 'Wisdom')[0] ? 1 : 0),
+      Charisma:
+        abilityScores.Charisma +
+        (featAsis.filter((a) => a === 'Charisma')[0] ? 1 : 0),
     };
 
     // asis
     abilityScores = {
-      str: abilityScores.str + (sumReducer(asis.map((a) => a.str)) || 0),
-      dex: abilityScores.dex + (sumReducer(asis.map((a) => a.dex)) || 0),
-      con: abilityScores.con + (sumReducer(asis.map((a) => a.con)) || 0),
-      int: abilityScores.int + (sumReducer(asis.map((a) => a.int)) || 0),
-      wis: abilityScores.wis + (sumReducer(asis.map((a) => a.wis)) || 0),
-      cha: abilityScores.cha + (sumReducer(asis.map((a) => a.cha)) || 0),
+      Strength:
+        abilityScores.Strength + (sumReducer(asis.map((a) => a.Strength)) || 0),
+      Dexterity:
+        abilityScores.Dexterity +
+        (sumReducer(asis.map((a) => a.Dexterity)) || 0),
+      Constitution:
+        abilityScores.Constitution +
+        (sumReducer(asis.map((a) => a.Constitution)) || 0),
+      Intelligence:
+        abilityScores.Intelligence +
+        (sumReducer(asis.map((a) => a.Intelligence)) || 0),
+      Wisdom:
+        abilityScores.Wisdom + (sumReducer(asis.map((a) => a.Wisdom)) || 0),
+      Charisma:
+        abilityScores.Charisma + (sumReducer(asis.map((a) => a.Charisma)) || 0),
     };
 
     // cap at 20
     abilityScores = {
-      str: abilityScores.str > 20 ? 20 : abilityScores.str,
-      dex: abilityScores.dex > 20 ? 20 : abilityScores.dex,
-      con: abilityScores.con > 20 ? 20 : abilityScores.con,
-      int: abilityScores.int > 20 ? 20 : abilityScores.int,
-      wis: abilityScores.wis > 20 ? 20 : abilityScores.wis,
-      cha: abilityScores.cha > 20 ? 20 : abilityScores.cha,
+      Strength: abilityScores.Strength > 20 ? 20 : abilityScores.Strength,
+      Dexterity: abilityScores.Dexterity > 20 ? 20 : abilityScores.Dexterity,
+      Constitution:
+        abilityScores.Constitution > 20 ? 20 : abilityScores.Constitution,
+      Intelligence:
+        abilityScores.Intelligence > 20 ? 20 : abilityScores.Intelligence,
+      Wisdom: abilityScores.Wisdom > 20 ? 20 : abilityScores.Wisdom,
+      Charisma: abilityScores.Charisma > 20 ? 20 : abilityScores.Charisma,
     };
 
     return abilityScores;
@@ -413,6 +431,7 @@ export class CharacterService {
         ...c.featureUsages,
         pastKnowledge: 0,
         telepathicDetectThoughts: 0,
+        vecnasLink: 0,
       },
     }));
   }
@@ -578,6 +597,16 @@ export class CharacterService {
     this.sourceState$$.update((c) => ({
       ...c,
       featureUsages: { ...c.featureUsages, scry: c.featureUsages.scry + 1 },
+    }));
+  }
+
+  useVecnaLink() {
+    this.sourceState$$.update((c) => ({
+      ...c,
+      featureUsages: {
+        ...c.featureUsages,
+        vecnasLink: c.featureUsages.vecnasLink + 1,
+      },
     }));
   }
 

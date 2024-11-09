@@ -42,7 +42,7 @@ import { CharacterService } from '../core/character.service';
         <span>Duration: Instantaneous</span>
         <span>
           Hit: +{{
-            characterService.character().abilityModifiers.wis +
+            characterService.character().abilityModifiers.Wisdom +
               characterService.character().proficiency
           }}
         </span>
@@ -67,7 +67,7 @@ import { CharacterService } from '../core/character.service';
         <span>Duration: Instantaneous</span>
         <span>
           Hit: +{{
-            characterService.character().abilityModifiers.wis +
+            characterService.character().abilityModifiers.Wisdom +
               characterService.character().proficiency
           }}
         </span>
@@ -104,13 +104,13 @@ import { CharacterService } from '../core/character.service';
         <span>10ft Reach</span>
         <span>
           +{{
-            characterService.character().abilityModifiers.str +
+            characterService.character().abilityModifiers.Strength +
               characterService.character().proficiency
           }}
           to hit
         </span>
         <span>
-          1d10 + {{ characterService.character().abilityModifiers.str }}
+          1d10 + {{ characterService.character().abilityModifiers.Strength }}
           Bludgeoning Dmg
         </span>
       </div>
@@ -120,13 +120,13 @@ import { CharacterService } from '../core/character.service';
         <span>5ft Reach</span>
         <span>
           +{{
-            characterService.character().abilityModifiers.str +
+            characterService.character().abilityModifiers.Strength +
               characterService.character().proficiency
           }}
           to hit
         </span>
         <span>
-          {{ 1 + characterService.character().abilityModifiers.str }}
+          {{ 1 + characterService.character().abilityModifiers.Strength }}
           Bludgeoning Dmg
         </span>
       </div>

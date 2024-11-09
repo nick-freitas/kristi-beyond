@@ -133,6 +133,7 @@ import { BadgeModule } from 'primeng/badge';
                 : 'secondary'
             "
           />
+          <p-badge value="x2 Adv" badgeSize="large" />
         </div>
 
         <!--Intimidation-->

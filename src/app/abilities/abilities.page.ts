@@ -35,6 +35,32 @@ import { MessagesModule } from 'primeng/messages';
             </p-button>
           </div>
         </p-fieldset>
+        <p-fieldset legend="Vecna's Link" [toggleable]="true">
+          <p>
+            You gain a special intuition for secrets. You have advantage on
+            insight checks. In addition an action to cast See Invisibility
+            without expanding a spell slot and without components. You can do
+            this once per long rest.
+          </p>
+
+          <p>
+            You also acquire the ability to use the power of secrets. You are
+            allowed to spend secrets to gain specific advantages depending on
+            the secret. Once you use that secret, it is lost from everyone's
+            mind.
+          </p>
+
+          <div class="pt-8">
+            <p-button
+              (click)="characterService.useVecnaLink()"
+              [disabled]="
+                characterService.character().featureUsages.vecnasLink >= 1
+              "
+            >
+              {{ characterService.character().featureUsages.vecnasLink }} / 1
+            </p-button>
+          </div>
+        </p-fieldset>
       </div>
     </p-card>
     <p-card header="Class Abilities">
