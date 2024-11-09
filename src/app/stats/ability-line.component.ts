@@ -10,49 +10,59 @@ import { CharacterService } from '../core/character.service';
     <p-card header="Strength" class="grow">
       <div class="flex flex-col gap-3 text-3xl items-center">
         <span>
-          {{ characterService.character().abilityModifiers.str }}
+          {{ characterService.character().abilityModifiers.Strength }}
         </span>
-        <span> ({{ characterService.character().abilityScores.str }}) </span>
+        <span>
+          ({{ characterService.character().abilityScores.Strength }})
+        </span>
       </div>
     </p-card>
     <p-card header="Constitution" class="grow">
       <div class="flex flex-col gap-3 text-3xl items-center">
         <span>
-          {{ characterService.character().abilityModifiers.con }}
+          {{ characterService.character().abilityModifiers.Constitution }}
         </span>
-        <span> ({{ characterService.character().abilityScores.con }}) </span>
+        <span>
+          ({{ characterService.character().abilityScores.Constitution }})
+        </span>
       </div>
     </p-card>
     <p-card header="Dexterity" class="grow">
       <div class="flex flex-col gap-3 text-3xl items-center">
         <span>
-          {{ characterService.character().abilityModifiers.dex }}
+          {{ characterService.character().abilityModifiers.Dexterity }}
         </span>
-        <span> ({{ characterService.character().abilityScores.dex }}) </span>
+        <span>
+          ({{ characterService.character().abilityScores.Dexterity }})
+        </span>
       </div>
     </p-card>
     <p-card header="Intelligence" class="grow">
       <div class="flex flex-col gap-3 text-3xl items-center">
         <span>
-          {{ characterService.character().abilityModifiers.int }}
+          {{ characterService.character().abilityModifiers.Intelligence }}
         </span>
-        <span> ({{ characterService.character().abilityScores.int }}) </span>
+        <span>
+          ({{ characterService.character().abilityScores.Intelligence }})
+        </span>
       </div>
     </p-card>
     <p-card header="Wisdom" class="grow">
       <div class="flex flex-col gap-3 text-3xl items-center">
         <span>
-          {{ characterService.character().abilityModifiers.wis }}
+          {{ characterService.character().abilityModifiers.Wisdom }}
         </span>
-        <span> ({{ characterService.character().abilityScores.wis }}) </span>
+        <span> ({{ characterService.character().abilityScores.Wisdom }}) </span>
       </div>
     </p-card>
     <p-card header="Charisma" class="grow">
       <div class="flex flex-col gap-3 text-3xl items-center">
         <span>
-          {{ characterService.character().abilityModifiers.cha }}
+          {{ characterService.character().abilityModifiers.Charisma }}
         </span>
-        <span> ({{ characterService.character().abilityScores.cha }}) </span>
+        <span>
+          ({{ characterService.character().abilityScores.Charisma }})
+        </span>
       </div>
     </p-card>
   `,

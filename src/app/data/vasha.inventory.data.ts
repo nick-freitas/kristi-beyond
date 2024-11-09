@@ -1,18 +1,6 @@
-import {
-  Inventory,
-  SourceCharacterState,
-} from './source-character-state.model';
+import { Inventory } from '../core/source-character-state.model';
 
-const rolledStats = {
-  str: 12,
-  dex: 13,
-  con: 13,
-  int: 9,
-  wis: 15,
-  cha: 9,
-};
-
-const inventory: Inventory[] = [
+export const vashaInventory: Inventory[] = [
   {
     qty: 1,
     name: 'Cloak of Protection',
@@ -44,7 +32,12 @@ const inventory: Inventory[] = [
       ac: 2,
       intiativeAdv: true,
       skillAdv: {
-        wis: true,
+        Strength: undefined,
+        Constitution: undefined,
+        Dexterity: undefined,
+        Intelligence: undefined,
+        Wisdom: true,
+        Charisma: undefined,
       },
     },
   },
@@ -78,7 +71,12 @@ const inventory: Inventory[] = [
     category: 'Ring',
     itemSpecific: {
       overrideAbilityScore: {
-        con: 19,
+        Strength: undefined,
+        Constitution: 19,
+        Dexterity: undefined,
+        Intelligence: undefined,
+        Wisdom: undefined,
+        Charisma: undefined,
       },
     },
   },
@@ -215,98 +213,3 @@ The awakened shrub is friendly toward you. Absent commands from you, it does not
     itemSpecific: {},
   },
 ];
-
-export const initialCharacter: SourceCharacterState = {
-  name: 'Vasha Taltos',
-  race: 'Reborn Vistani',
-  background: 'Hermit',
-  alignment: 'UK',
-  inspiration: 0,
-  additionalInventory: '',
-  classes: [
-    {
-      class: 'Wild Oracle',
-      subclass: 'Fate of the Chosen',
-      level: 11,
-      hitDie: 8,
-    },
-  ],
-  rolledStats,
-  featureUsages: {
-    pastKnowledge: 0,
-    sharedDestiny: 0,
-    scry: 0,
-    convergentReturn: 0,
-    telepathicDetectThoughts: 0,
-    creepingHand: 0,
-  },
-  currentHp: undefined,
-  currentHitDie: undefined,
-  hitDieType: 'd8',
-  conditions: {},
-  overrideAbilityScores: {},
-  asis: [
-    { level: 4, wis: 1, dex: 1 },
-    { level: 8, wis: 1, cha: 1 },
-  ],
-  saveProficiencies: {
-    wis: true,
-    cha: true,
-  },
-  feats: [
-    {
-      level: 1,
-      name: 'Telepathic',
-      description: '',
-      asi: 'wis',
-    },
-  ],
-  languages: ['Common', 'Sylvan', 'Orcish', 'Telepathic (60ft)'],
-  tools: ['Herbalism Kit', "Calligrapher's Set", 'Playing Cards'],
-  armourProficiencies: ['Light Armour'],
-  weaponProficiencies: [
-    'Simple Weapons',
-    'Hand Crossbows',
-    'Heavy Crossbows',
-    'Glaives',
-    'Whips',
-    'Shortswords',
-  ],
-  tempHp: 0,
-  speeds: { land: 30, swim: 15, climb: 15 },
-  resistances: { poison: true },
-  immunities: { magicalSleep: true },
-  advantages: {
-    deathSaves: true,
-    diseasePoison: true,
-  },
-  rolledHP: [8, 5, 2, 6, 8, 4, 2, 6, 3, 2, 7],
-  maxHpModifier: 0,
-  maxHpOverride: 0,
-  skillProficiencies: {
-    arcana: true, //wild oracle
-    insight: true, //wild oracle
-    investigation: true, //reborn
-    medicine: true, //hermit
-    persuasion: true, //reborn
-    religion: true, //hermit
-  },
-  racialAsis: {
-    con: 1,
-    int: 1,
-    wis: 1,
-  },
-  equippedArmourType: 'Leather',
-  deathSaves: [],
-  wealth: {
-    gold: 1905,
-    silver: 0,
-    copper: 0,
-  },
-  wealthTransaction: {
-    gold: [45, 100, 1850],
-    silver: [],
-    copper: [],
-  },
-  inventory,
-};
