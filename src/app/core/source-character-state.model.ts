@@ -25,6 +25,7 @@ export type Inventory = {
     properties?: string;
     saveMod?: number;
     intiativeAdv?: boolean;
+    additionalMod?: number;
     skillAdv?: abilities<boolean | undefined>;
     overrideAbilityScore?: abilities<number | undefined>;
   };

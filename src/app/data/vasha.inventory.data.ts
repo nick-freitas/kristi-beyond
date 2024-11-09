@@ -172,7 +172,7 @@ The awakened shrub is friendly toward you. Absent commands from you, it does not
   },
   {
     qty: 1,
-    name: 'Glaive',
+    name: 'Glaive +1',
     notes: 'Martial, Melee, Heavy, Reach, Two-Handed',
     weight: 6,
     value: 20,
@@ -183,6 +183,7 @@ The awakened shrub is friendly toward you. Absent commands from you, it does not
     itemSpecific: {
       proficient: true,
       attackModStat: 'Strength',
+      additionalMod: 1,
       damage: '1d10',
       damageType: 'Slashing',
       properties: 'Heavy, Reach, Two-Handed',

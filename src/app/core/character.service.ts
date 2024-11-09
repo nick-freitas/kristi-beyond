@@ -114,9 +114,18 @@ export class CharacterService {
           i.itemSpecific.attackMod += proficiency;
         }
 
+        if (i.itemSpecific.additionalMod) {
+          i.itemSpecific.attackMod += i.itemSpecific.additionalMod;
+        }
+
         i.itemSpecific.damageMod =
           // @ts-ignore
-          abilityModifiers[i.itemSpecific.attackModStat];
+          abilityModifiers[i.itemSpecific.attackModStat] || 0;
+
+        if (i.itemSpecific.additionalMod) {
+          i.itemSpecific.damageMod =
+            (i.itemSpecific.damageMod || 0) + i.itemSpecific.additionalMod;
+        }
 
         return { ...i };
       });
