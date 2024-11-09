@@ -212,4 +212,16 @@ The awakened shrub is friendly toward you. Absent commands from you, it does not
     equipped: false,
     itemSpecific: {},
   },
+  {
+    qty: 2,
+    name: 'Potions of Healing',
+    notes: 'One makes shadows, one smells like rain',
+    weight: 0,
+    value: 0,
+    requiresAttunement: false,
+    isAttuned: false,
+    category: '',
+    equipped: false,
+    itemSpecific: {},
+  },
 ];
