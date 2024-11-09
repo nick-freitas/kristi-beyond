@@ -71,7 +71,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
         <!--      }-->
 
         @if (item.category === 'Weapon') {
-          {{ item | json }}
+          <!--          {{ item | json }}-->
           <p-card header="Weapon" class="grow order-4">
             <div class="grid grid-flow-col gap-3 text-2xl">
               <span> Weapon: {{ item.name }} </span>
