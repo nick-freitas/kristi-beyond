@@ -14,7 +14,7 @@ export type Inventory = {
     proficient?: boolean;
     ac?: number;
     acOffset?: number;
-    str?: number;
+    Strength?: number;
     stealthDis?: boolean;
     armourType?: 'Light' | 'Medium' | 'Heavy';
     attackMod?: number;

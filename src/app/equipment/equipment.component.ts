@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { MessagesModule } from 'primeng/messages';
 import { Button } from 'primeng/button';
 import { DataViewModule } from 'primeng/dataview';
-import { NgClass, NgForOf } from '@angular/common';
+import { JsonPipe, NgClass, NgForOf } from '@angular/common';
 import { CharacterService } from '../core/character.service';
 import { TagModule } from 'primeng/tag';
 import { CardModule } from 'primeng/card';
@@ -20,6 +20,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
     NgForOf,
     CardModule,
     FloatLabelModule,
+    JsonPipe,
   ],
   template: `
     @for (item of characterService.character().equipped; track item) {
@@ -30,7 +31,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
               <span> Armour: {{ item.name }} </span>
               <span> Type: {{ item.itemSpecific.armourType }} </span>
               <span> AC: {{ item.itemSpecific.ac }} </span>
-              <span> Strength: {{ item.itemSpecific.str }} </span>
+              <span> Strength: {{ item.itemSpecific.Strength }} </span>
               <span>
                 Stealth Disadvantage:
                 {{ item.itemSpecific.stealthDis ? 'Yes' : 'No' }}
@@ -70,6 +71,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
         <!--      }-->
 
         @if (item.category === 'Weapon') {
+          {{ item | json }}
           <p-card header="Weapon" class="grow order-4">
             <div class="grid grid-flow-col gap-3 text-2xl">
               <span> Weapon: {{ item.name }} </span>
