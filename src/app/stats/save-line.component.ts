@@ -10,9 +10,9 @@ import { CharacterService } from '../core/character.service';
     <p-card header="Str Save" class="grow">
       <div class="flex flex-col gap-3 text-3xl items-center">
         <span>
-          {{ characterService.character().saveModifiers.str }}
+          {{ characterService.character().saveModifiers.Strength }}
         </span>
-        @if (characterService.character().saveProficiencies.str) {
+        @if (characterService.character().saveProficiencies.Strength) {
           <span class="text-sm"> Prof </span>
         } @else {
           <span class="text-sm"> &nbsp;</span>
@@ -22,9 +22,9 @@ import { CharacterService } from '../core/character.service';
     <p-card header="Con Save" class="grow">
       <div class="flex flex-col gap-3 text-3xl items-center">
         <span>
-          {{ characterService.character().saveModifiers.con }}
+          {{ characterService.character().saveModifiers.Constitution }}
         </span>
-        @if (characterService.character().saveProficiencies.con) {
+        @if (characterService.character().saveProficiencies.Constitution) {
           <span class="text-sm"> Prof </span>
         } @else {
           <span class="text-sm"> &nbsp;</span>
@@ -34,9 +34,9 @@ import { CharacterService } from '../core/character.service';
     <p-card header="Dex Save" class="grow">
       <div class="flex flex-col gap-3 text-3xl items-center">
         <span>
-          {{ characterService.character().saveModifiers.dex }}
+          {{ characterService.character().saveModifiers.Dexterity }}
         </span>
-        @if (characterService.character().saveProficiencies.dex) {
+        @if (characterService.character().saveProficiencies.Dexterity) {
           <span class="text-sm"> Prof </span>
         } @else {
           <span class="text-sm"> &nbsp;</span>
@@ -46,9 +46,9 @@ import { CharacterService } from '../core/character.service';
     <p-card header="Int Save" class="grow">
       <div class="flex flex-col gap-3 text-3xl items-center">
         <span>
-          {{ characterService.character().saveModifiers.int }}
+          {{ characterService.character().saveModifiers.Intelligence }}
         </span>
-        @if (characterService.character().saveProficiencies.int) {
+        @if (characterService.character().saveProficiencies.Intelligence) {
           <span class="text-sm"> Prof </span>
         } @else {
           <span class="text-sm"> &nbsp;</span>
@@ -58,9 +58,9 @@ import { CharacterService } from '../core/character.service';
     <p-card header="Wis Save" class="grow">
       <div class="flex flex-col gap-3 text-3xl items-center">
         <span>
-          {{ characterService.character().saveModifiers.wis }}
+          {{ characterService.character().saveModifiers.Wisdom }}
         </span>
-        @if (characterService.character().saveProficiencies.wis) {
+        @if (characterService.character().saveProficiencies.Wisdom) {
           <span class="text-sm"> Prof </span>
         } @else {
           <span class="text-sm"> &nbsp;</span>
@@ -70,9 +70,9 @@ import { CharacterService } from '../core/character.service';
     <p-card header="Cha Save" class="grow">
       <div class="flex flex-col gap-3 text-3xl items-center">
         <span>
-          {{ characterService.character().saveModifiers.cha }}
+          {{ characterService.character().saveModifiers.Charisma }}
         </span>
-        @if (characterService.character().saveProficiencies.cha) {
+        @if (characterService.character().saveProficiencies.Charisma) {
           <span class="text-sm"> Prof </span>
         } @else {
           <span class="text-sm"> &nbsp;</span>
