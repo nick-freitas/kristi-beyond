@@ -1,3 +1,5 @@
+import { abilities, ability } from '../data/dnd5e.system.data';
+
 export type Inventory = {
   qty: number;
   name: string;
@@ -23,13 +25,8 @@ export type Inventory = {
     properties?: string;
     saveMod?: number;
     intiativeAdv?: boolean;
-    skillAdv?: {
-      wis?: boolean;
-    };
-    overrideAbilityScore?: {
-      con?: number;
-      str?: number;
-    };
+    skillAdv?: abilities<boolean | undefined>;
+    overrideAbilityScore?: abilities<number | undefined>;
   };
 };
 
@@ -52,6 +49,7 @@ export type SourceCharacterState = {
     scry: number;
     convergentReturn: number;
     creepingHand: number;
+    vecnasLink: number;
   };
   inspiration: number;
   tempHp: number;
@@ -59,28 +57,17 @@ export type SourceCharacterState = {
   currentHitDie: number | undefined;
   hitDieType: string;
   deathSaves: boolean[];
-  rolledStats: {
-    str: number;
-    dex: number;
-    con: number;
-    int: number;
-    wis: number;
-    cha: number;
-  };
-  asis: {
-    level: number;
-    str?: number;
-    dex?: number;
-    con?: number;
-    int?: number;
-    wis?: number;
-    cha?: number;
-  }[];
+  rolledStats: abilities<number>;
+  asis: Array<
+    {
+      level: number;
+    } & abilities<number | undefined>
+  >;
   feats: {
     level: number;
     name: string;
     description: string;
-    asi: string;
+    asi: ability;
   }[];
 
   languages: string[];
@@ -127,31 +114,10 @@ export type SourceCharacterState = {
     stealth?: boolean;
     survival?: boolean;
   };
-  racialAsis: {
-    str?: number;
-    dex?: number;
-    con?: number;
-    int?: number;
-    wis?: number;
-    cha?: number;
-  };
-  saveProficiencies: {
-    str?: boolean;
-    dex?: boolean;
-    con?: boolean;
-    int?: boolean;
-    wis?: boolean;
-    cha?: boolean;
-  };
+  racialAsis: abilities<number | undefined>;
+  saveProficiencies: abilities<boolean | undefined>;
   inventory: Inventory[];
-  overrideAbilityScores: {
-    str?: number;
-    dex?: number;
-    con?: number;
-    int?: number;
-    wis?: number;
-    cha?: number;
-  };
+  overrideAbilityScores: abilities<number | undefined>;
   armourProficiencies: string[];
   weaponProficiencies: string[];
   equippedArmourType: string;

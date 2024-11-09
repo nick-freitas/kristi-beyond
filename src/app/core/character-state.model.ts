@@ -2,25 +2,12 @@ import {
   Inventory,
   SourceCharacterState,
 } from './source-character-state.model';
+import { abilities } from '../data/dnd5e.system.data';
 
 export type CharacterState = SourceCharacterState & {
   totalLevel: number;
-  abilityScores: {
-    str: number;
-    dex: number;
-    con: number;
-    int: number;
-    wis: number;
-    cha: number;
-  };
-  abilityModifiers: {
-    str: number;
-    dex: number;
-    con: number;
-    int: number;
-    wis: number;
-    cha: number;
-  };
+  abilityScores: abilities<number>;
+  abilityModifiers: abilities<number>;
   deathFails: number;
   deathPasses: number;
   totalInitialHP: number;
@@ -33,14 +20,7 @@ export type CharacterState = SourceCharacterState & {
     perception: number;
     insight: number;
   };
-  saveModifiers: {
-    str: number;
-    dex: number;
-    con: number;
-    int: number;
-    wis: number;
-    cha: number;
-  };
+  saveModifiers: abilities<number>;
   skillModifiers: {
     acrobatics: number;
     animalHandling: number;
