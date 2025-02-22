@@ -38,6 +38,37 @@ export class CharacterService {
         character.classes.map((c) => c.level).filter((x) => x),
       );
 
+      const oracleLevel = character.classes.find((c) =>
+        c.class.toLocaleLowerCase().includes('oracle'),
+      )?.level;
+      if (!oracleLevel) {
+        throw new Error('Could not find Oracle Class for level count');
+      } else if (oracleLevel < 1) {
+        throw new Error('Could not find Oracle Level');
+      } else if (oracleLevel < 9) {
+        character.rageDamage = 2;
+      } else if (oracleLevel < 16) {
+        character.rageDamage = 3;
+      } else if (oracleLevel < 21) {
+        character.rageDamage = 4;
+      } else {
+        throw new Error('Oracle Level exceeds 20');
+      }
+
+      if (character.rage) {
+        character.saveAdvantages.Strength = true;
+        character.abilityAdvantages.Strength = true;
+
+        character.resistances.bludgeoning = true;
+        character.resistances.piercing = true;
+        character.resistances.slashing = true;
+      } else {
+        // todo: this should not work this way but im in a hurry
+        character.resistances.bludgeoning = false;
+        character.resistances.piercing = false;
+        character.resistances.slashing = false;
+      }
+
       const proficiency = this.calcProficiencyModifier(totalLevel);
       let equipped = character.inventory.filter((i) => i.equipped);
 
@@ -122,9 +153,13 @@ export class CharacterService {
           // @ts-ignore
           abilityModifiers[i.itemSpecific.attackModStat] || 0;
 
+        i.itemSpecific.damageMod ??= 0;
         if (i.itemSpecific.additionalMod) {
-          i.itemSpecific.damageMod =
-            (i.itemSpecific.damageMod || 0) + i.itemSpecific.additionalMod;
+          i.itemSpecific.damageMod += i.itemSpecific.additionalMod;
+        }
+
+        if (character.rage) {
+          i.itemSpecific.damageMod += character.rageDamage;
         }
 
         return { ...i };
@@ -599,6 +634,13 @@ export class CharacterService {
     this.sourceState$$.update((c) => ({
       ...c,
       inspiration: c.inspiration ^ 1,
+    }));
+  }
+
+  toggleRage() {
+    this.sourceState$$.update((c) => ({
+      ...c,
+      rage: c.rage ^ 1,
     }));
   }
 

@@ -27,7 +27,7 @@ import { FormsModule } from '@angular/forms';
         </div>
       }
     </p-card>
-    <p-card header="Inspiration" class="lg:max-w-[14rem]  ">
+    <p-card header="Inspiration" class="lg:max-w-[14rem]">
       <div class="flex justify-center items-center">
         <p-rating
           [ngModel]="characterService.character().inspiration"
@@ -40,6 +40,26 @@ import { FormsModule } from '@angular/forms';
           </ng-template>
           <ng-template pTemplate="officon">
             <i class="pi pi-star" style="font-size: 10rem"></i>
+          </ng-template>
+        </p-rating>
+      </div>
+    </p-card>
+    <p-card header="Rage" class="lg:max-w-[14rem]">
+      <div class="flex justify-center items-center">
+        <p-rating
+          [ngModel]="characterService.character().rage"
+          (ngModelChange)="characterService.toggleRage()"
+          [cancel]="false"
+          [stars]="1"
+        >
+          <ng-template pTemplate="onicon">
+            <i class="pi pi-circle-on" style="font-size: 10rem"></i>
+            <span class="text-red-400 flex content-center text-2xl mt-8">
+              RAGING
+            </span>
+          </ng-template>
+          <ng-template pTemplate="officon">
+            <i class="pi pi-circle-off" style="font-size: 10rem"></i>
           </ng-template>
         </p-rating>
       </div>

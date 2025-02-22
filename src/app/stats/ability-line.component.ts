@@ -15,6 +15,11 @@ import { CharacterService } from '../core/character.service';
         <span>
           ({{ characterService.character().abilityScores.Strength }})
         </span>
+        @if (characterService.character().abilityAdvantages.Strength) {
+          <span class="text-red-400 flex content-center text-2xl mt-8">
+            Adv
+          </span>
+        }
       </div>
     </p-card>
     <p-card header="Constitution" class="grow">
@@ -25,6 +30,9 @@ import { CharacterService } from '../core/character.service';
         <span>
           ({{ characterService.character().abilityScores.Constitution }})
         </span>
+        @if (characterService.character().abilityAdvantages.Constitution) {
+          <span class="text-sm"> Adv </span>
+        }
       </div>
     </p-card>
     <p-card header="Dexterity" class="grow">
@@ -35,6 +43,9 @@ import { CharacterService } from '../core/character.service';
         <span>
           ({{ characterService.character().abilityScores.Dexterity }})
         </span>
+        @if (characterService.character().abilityAdvantages.Dexterity) {
+          <span class="text-sm"> Adv </span>
+        }
       </div>
     </p-card>
     <p-card header="Intelligence" class="grow">
@@ -45,6 +56,9 @@ import { CharacterService } from '../core/character.service';
         <span>
           ({{ characterService.character().abilityScores.Intelligence }})
         </span>
+        @if (characterService.character().abilityAdvantages.Intelligence) {
+          <span class="text-sm"> Adv </span>
+        }
       </div>
     </p-card>
     <p-card header="Wisdom" class="grow">
@@ -53,6 +67,9 @@ import { CharacterService } from '../core/character.service';
           {{ characterService.character().abilityModifiers.Wisdom }}
         </span>
         <span> ({{ characterService.character().abilityScores.Wisdom }}) </span>
+        @if (characterService.character().abilityAdvantages.Wisdom) {
+          <span class="text-sm"> Adv </span>
+        }
       </div>
     </p-card>
     <p-card header="Charisma" class="grow">
@@ -63,6 +80,9 @@ import { CharacterService } from '../core/character.service';
         <span>
           ({{ characterService.character().abilityScores.Charisma }})
         </span>
+        @if (characterService.character().abilityAdvantages.Charisma) {
+          <span class="text-sm"> Adv </span>
+        }
       </div>
     </p-card>
   `,
