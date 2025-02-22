@@ -7,6 +7,7 @@ import { abilities } from '../data/dnd5e.system.data';
 export type CharacterState = SourceCharacterState & {
   totalLevel: number;
   abilityScores: abilities<number>;
+  abilityAdvantages: abilities<boolean>;
   abilityModifiers: abilities<number>;
   deathFails: number;
   deathPasses: number;

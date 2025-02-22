@@ -14,8 +14,12 @@ import { CharacterService } from '../core/character.service';
         </span>
         @if (characterService.character().saveProficiencies.Strength) {
           <span class="text-sm"> Prof </span>
-        } @else {
-          <span class="text-sm"> &nbsp;</span>
+        }
+
+        @if (characterService.character().saveAdvantages.Strength) {
+          <span class="text-red-400 flex content-center text-2xl mt-8">
+            Adv
+          </span>
         }
       </div>
     </p-card>
@@ -26,8 +30,10 @@ import { CharacterService } from '../core/character.service';
         </span>
         @if (characterService.character().saveProficiencies.Constitution) {
           <span class="text-sm"> Prof </span>
-        } @else {
-          <span class="text-sm"> &nbsp;</span>
+        }
+
+        @if (characterService.character().saveAdvantages.Constitution) {
+          <span class="text-sm"> Adv </span>
         }
       </div>
     </p-card>
@@ -38,8 +44,10 @@ import { CharacterService } from '../core/character.service';
         </span>
         @if (characterService.character().saveProficiencies.Dexterity) {
           <span class="text-sm"> Prof </span>
-        } @else {
-          <span class="text-sm"> &nbsp;</span>
+        }
+
+        @if (characterService.character().saveAdvantages.Dexterity) {
+          <span class="text-sm"> Adv </span>
         }
       </div>
     </p-card>
@@ -50,8 +58,10 @@ import { CharacterService } from '../core/character.service';
         </span>
         @if (characterService.character().saveProficiencies.Intelligence) {
           <span class="text-sm"> Prof </span>
-        } @else {
-          <span class="text-sm"> &nbsp;</span>
+        }
+
+        @if (characterService.character().saveAdvantages.Intelligence) {
+          <span class="text-sm"> Adv </span>
         }
       </div>
     </p-card>
@@ -62,8 +72,10 @@ import { CharacterService } from '../core/character.service';
         </span>
         @if (characterService.character().saveProficiencies.Wisdom) {
           <span class="text-sm"> Prof </span>
-        } @else {
-          <span class="text-sm"> &nbsp;</span>
+        }
+
+        @if (characterService.character().saveAdvantages.Wisdom) {
+          <span class="text-sm"> Adv </span>
         }
       </div>
     </p-card>
@@ -74,8 +86,10 @@ import { CharacterService } from '../core/character.service';
         </span>
         @if (characterService.character().saveProficiencies.Charisma) {
           <span class="text-sm"> Prof </span>
-        } @else {
-          <span class="text-sm"> &nbsp;</span>
+        }
+
+        @if (characterService.character().saveAdvantages.Charisma) {
+          <span class="text-sm"> Adv </span>
         }
       </div>
     </p-card>

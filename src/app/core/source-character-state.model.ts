@@ -32,6 +32,7 @@ export type Inventory = {
 };
 
 export type SourceCharacterState = {
+  abilityAdvantages: abilities<boolean>;
   name: string;
   race: string;
   background: string;
@@ -53,6 +54,7 @@ export type SourceCharacterState = {
     vecnasLink: number;
   };
   inspiration: number;
+  rage: number;
   tempHp: number;
   currentHp: number | undefined;
   currentHitDie: number | undefined;
@@ -83,6 +85,9 @@ export type SourceCharacterState = {
   resistances: {
     poison?: boolean;
     magicalSleep?: boolean;
+    bludgeoning?: boolean;
+    piercing?: boolean;
+    slashing?: boolean;
   };
   immunities: {
     poison?: boolean;
@@ -117,6 +122,7 @@ export type SourceCharacterState = {
   };
   racialAsis: abilities<number | undefined>;
   saveProficiencies: abilities<boolean | undefined>;
+  saveAdvantages: abilities<boolean | undefined>;
   inventory: Inventory[];
   overrideAbilityScores: abilities<number | undefined>;
   armourProficiencies: string[];
@@ -150,4 +156,5 @@ export type SourceCharacterState = {
     magicalSleep?: boolean;
     exhaustion?: number;
   };
+  rageDamage: number;
 };

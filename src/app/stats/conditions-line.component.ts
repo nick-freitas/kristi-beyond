@@ -172,6 +172,15 @@ import { CharacterService } from '../core/character.service';
           @if (characterService.character().resistances.poison) {
             <span>(R) Poison</span>
           }
+          @if (characterService.character().resistances.slashing) {
+            <span>(R) Slashing</span>
+          }
+          @if (characterService.character().resistances.bludgeoning) {
+            <span>(R) Bludgeoning</span>
+          }
+          @if (characterService.character().resistances.piercing) {
+            <span>(R) Piercing</span>
+          }
         </div>
       </p-card>
       <p-card header="Immunities" class="">

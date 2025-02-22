@@ -17,6 +17,7 @@ export const initialCharacter: SourceCharacterState = {
   background: 'Hermit',
   alignment: 'UK',
   inspiration: 0,
+  rage: 0,
   additionalInventory: '',
   classes: [
     {
@@ -76,6 +77,22 @@ export const initialCharacter: SourceCharacterState = {
     Wisdom: true,
     Charisma: true,
   },
+  saveAdvantages: {
+    Strength: undefined,
+    Constitution: undefined,
+    Dexterity: undefined,
+    Intelligence: undefined,
+    Wisdom: undefined,
+    Charisma: undefined,
+  },
+  abilityAdvantages: {
+    Strength: false,
+    Constitution: false,
+    Dexterity: false,
+    Intelligence: false,
+    Wisdom: false,
+    Charisma: false,
+  },
   feats: [
     {
       level: 1,
@@ -125,14 +142,15 @@ export const initialCharacter: SourceCharacterState = {
   equippedArmourType: 'Leather',
   deathSaves: [],
   wealth: {
-    gold: 10285,
+    gold: 285,
     silver: 0,
     copper: 0,
   },
   wealthTransaction: {
-    gold: [45, 100, 1850, 10000, -1200, -100, -320],
+    gold: [45, 100, 1850, 10000, -1200, -100, -320, -10000],
     silver: [],
     copper: [],
   },
+  rageDamage: -9999,
   inventory: vashaInventory,
 };
