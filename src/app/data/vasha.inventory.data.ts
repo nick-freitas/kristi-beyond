@@ -225,4 +225,16 @@ The awakened shrub is friendly toward you. Absent commands from you, it does not
     equipped: false,
     itemSpecific: {},
   },
+  {
+    qty: 1,
+    name: 'Netherese Book',
+    notes: 'Purchased from Pembroke',
+    weight: 0,
+    value: 10000,
+    requiresAttunement: false,
+    isAttuned: false,
+    category: 'Book',
+    equipped: false,
+    itemSpecific: {},
+  },
 ];
