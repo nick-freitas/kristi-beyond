@@ -63,6 +63,9 @@ export class CharacterService {
         character.resistances.piercing = true;
         character.resistances.slashing = true;
       } else {
+        character.saveAdvantages.Strength = false;
+        character.abilityAdvantages.Strength = false;
+
         // todo: this should not work this way but im in a hurry
         character.resistances.bludgeoning = false;
         character.resistances.piercing = false;
