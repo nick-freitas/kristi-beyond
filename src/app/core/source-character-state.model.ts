@@ -72,7 +72,6 @@ export type SourceCharacterState = {
     description: string;
     asi: ability;
   }[];
-
   languages: string[];
   tools: string[];
   speeds: {

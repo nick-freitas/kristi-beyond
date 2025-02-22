@@ -21,6 +21,8 @@ export type CharacterState = SourceCharacterState & {
     perception: number;
     insight: number;
   };
+  spellSaveDC: number;
+  spellAttackModifier: number;
   saveModifiers: abilities<number>;
   skillModifiers: {
     acrobatics: number;

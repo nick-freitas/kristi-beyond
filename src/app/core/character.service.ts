@@ -287,6 +287,9 @@ export class CharacterService {
         saveModifiers[key] += totalToAllSaveMods;
       }
 
+      const spellSaveDC = 8 + proficiency + abilityModifiers.Wisdom;
+      const spellAttackModifier = proficiency + abilityModifiers.Wisdom;
+
       if (character.currentHitDie === undefined)
         character.currentHitDie = totalLevel;
 
@@ -301,6 +304,8 @@ export class CharacterService {
         totalMaxHP,
         ac,
         proficiency,
+        spellSaveDC,
+        spellAttackModifier,
         initiative: abilityModifiers.Dexterity,
         saveModifiers,
         skillModifiers,

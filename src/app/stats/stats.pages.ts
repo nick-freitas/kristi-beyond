@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { CardModule } from 'primeng/card';
-import { NgIf } from '@angular/common';
 import { AbilityLineComponent } from './ability-line.component';
 import { SaveLineComponent } from './save-line.component';
 import { QuickRefLineComponent } from './quick-ref-line.component';
@@ -15,12 +14,13 @@ import { PassiveLineComponent } from './passive-line.component';
 import { ScrollTopModule } from 'primeng/scrolltop';
 import { MessagesModule } from 'primeng/messages';
 import { MessageService } from 'primeng/api';
+import { SpellStatsComponent } from './spell-stats.component';
 
 @Component({
   standalone: true,
   imports: [
     CardModule,
-    NgIf,
+    SpellStatsComponent,
     AbilityLineComponent,
     SaveLineComponent,
     QuickRefLineComponent,
@@ -38,6 +38,7 @@ import { MessageService } from 'primeng/api';
   providers: [MessageService],
   template: `
     <app-top-line />
+    <app-spell-stats-line />
     <app-interaction-line />
     <app-conditions-line />
     <app-quick-ref-line />
