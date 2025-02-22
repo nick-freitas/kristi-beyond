@@ -44,26 +44,6 @@ import { FormsModule } from '@angular/forms';
         </p-rating>
       </div>
     </p-card>
-    <p-card header="Rage" class="lg:max-w-[14rem]">
-      <div class="flex justify-center items-center">
-        <p-rating
-          [ngModel]="characterService.character().rage"
-          (ngModelChange)="characterService.toggleRage()"
-          [cancel]="false"
-          [stars]="1"
-        >
-          <ng-template pTemplate="onicon">
-            <i class="pi pi-circle-on" style="font-size: 10rem"></i>
-            <span class="text-red-400 flex content-center text-2xl mt-8">
-              RAGING
-            </span>
-          </ng-template>
-          <ng-template pTemplate="officon">
-            <i class="pi pi-circle-off" style="font-size: 10rem"></i>
-          </ng-template>
-        </p-rating>
-      </div>
-    </p-card>
   `,
   styles: `
     :host {

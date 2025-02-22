@@ -202,7 +202,7 @@ The awakened shrub is friendly toward you. Absent commands from you, it does not
     itemSpecific: {},
   },
   {
-    qty: 2,
+    qty: 1,
     name: 'Greater Potions of Healing',
     notes: 'Potion, Healing, Consumable, 4d4 + 4',
     weight: 0,
