@@ -125,12 +125,12 @@ export const initialCharacter: SourceCharacterState = {
   equippedArmourType: 'Leather',
   deathSaves: [],
   wealth: {
-    gold: 10285,
+    gold: 285,
     silver: 0,
     copper: 0,
   },
   wealthTransaction: {
-    gold: [45, 100, 1850, 10000, -1200, -100, -320],
+    gold: [45, 100, 1850, 10000, -1200, -100, -320, -10000],
     silver: [],
     copper: [],
   },
