@@ -214,6 +214,18 @@ The awakened shrub is friendly toward you. Absent commands from you, it does not
     itemSpecific: {},
   },
   {
+    qty: 1,
+    name: 'Superior Potions of Healing',
+    notes: 'Potion, Healing, Consumable, 8d4 + 8',
+    weight: 0,
+    value: 0,
+    requiresAttunement: false,
+    isAttuned: false,
+    category: '',
+    equipped: false,
+    itemSpecific: {},
+  },
+  {
     qty: 2,
     name: 'Potions of Healing',
     notes: 'One makes shadows, one smells like rain',
