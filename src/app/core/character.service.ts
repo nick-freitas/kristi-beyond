@@ -28,6 +28,13 @@ export class CharacterService {
 
     if (savedCharacter) {
       this.sourceState$$ = signal(JSON.parse(savedCharacter));
+      // after leveling up always reset
+      if (
+        this.sourceState$$().classes[0].level <
+        initialCharacter.classes[0].level
+      ) {
+        this.reloadCharacter();
+      }
     } else {
       this.sourceState$$ = signal(initialCharacter);
     }
