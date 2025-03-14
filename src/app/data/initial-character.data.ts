@@ -23,7 +23,7 @@ export const initialCharacter: SourceCharacterState = {
     {
       class: 'Wild Oracle',
       subclass: 'Fate of the Chosen',
-      level: 11,
+      level: 12,
       hitDie: 8,
     },
   ],
@@ -120,7 +120,7 @@ export const initialCharacter: SourceCharacterState = {
     deathSaves: true,
     diseasePoison: true,
   },
-  rolledHP: [8, 5, 2, 6, 8, 4, 2, 6, 3, 2, 5],
+  rolledHP: [8, 5, 2, 6, 8, 4, 2, 6, 3, 2, 5, 5],
   maxHpModifier: 0,
   maxHpOverride: 0,
   skillProficiencies: {
