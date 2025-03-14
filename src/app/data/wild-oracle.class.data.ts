@@ -63,7 +63,6 @@ export const wildOracleClass: any = {
     abilityModifier: 'wis',
   },
   ////
-
   feats: [
     {
       level: 1,
