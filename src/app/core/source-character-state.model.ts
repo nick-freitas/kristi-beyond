@@ -32,6 +32,7 @@ export type Inventory = {
 };
 
 export type SourceCharacterState = {
+  version: string;
   abilityAdvantages: abilities<boolean>;
   name: string;
   race: string;

@@ -12,6 +12,7 @@ const rolledStats: abilities<number> = {
 };
 
 export const initialCharacter: SourceCharacterState = {
+  version: '',
   name: 'Vasha Taltos',
   race: 'Reborn Vistani',
   background: 'Hermit',
