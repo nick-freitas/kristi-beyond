@@ -15,12 +15,15 @@ import { CharacterState } from './character-state.model';
 import { initialCharacter } from '../data/initial-character.data';
 import { abilities, ability } from '../data/dnd5e.system.data';
 
+const latestVersion = '';
+
 @Injectable({
   providedIn: 'root',
 })
 export class CharacterService {
   private readonly sourceState$$: WritableSignal<SourceCharacterState>;
   public readonly character: Signal<CharacterState>;
+  private readonly latestVersion = '250328A';
 
   constructor() {
     let savedCharacter = localStorage.getItem('character');
@@ -28,12 +31,14 @@ export class CharacterService {
 
     if (savedCharacter) {
       this.sourceState$$ = signal(JSON.parse(savedCharacter));
-      // after leveling up always reset
-      if (
-        this.sourceState$$().classes[0].level <
-        initialCharacter.classes[0].level
-      ) {
+
+      // after reset on new version
+      if (this.sourceState$$().version !== latestVersion) {
         this.reloadCharacter();
+        this.sourceState$$.update((character) => ({
+          ...character,
+          version: latestVersion,
+        }));
       }
     } else {
       this.sourceState$$ = signal(initialCharacter);
