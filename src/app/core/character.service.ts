@@ -15,15 +15,13 @@ import { CharacterState } from './character-state.model';
 import { initialCharacter } from '../data/initial-character.data';
 import { abilities, ability } from '../data/dnd5e.system.data';
 
-const latestVersion = '';
-
 @Injectable({
   providedIn: 'root',
 })
 export class CharacterService {
   private readonly sourceState$$: WritableSignal<SourceCharacterState>;
   public readonly character: Signal<CharacterState>;
-  private readonly latestVersion = '250328A';
+  private readonly latestVersion = '250328B';
 
   constructor() {
     let savedCharacter = localStorage.getItem('character');
@@ -33,11 +31,11 @@ export class CharacterService {
       this.sourceState$$ = signal(JSON.parse(savedCharacter));
 
       // after reset on new version
-      if (this.sourceState$$().version !== latestVersion) {
+      if (this.sourceState$$().version !== this.latestVersion) {
         this.reloadCharacter();
         this.sourceState$$.update((character) => ({
           ...character,
-          version: latestVersion,
+          version: this.latestVersion,
         }));
       }
     } else {
@@ -504,40 +502,40 @@ export class CharacterService {
     return Math.ceil(totalLevel / 4) + 1;
   }
 
-  private getAcBaseFromArmour(equippedArmourType: string): number {
-    switch (equippedArmourType.toLowerCase()) {
-      case 'padded':
-      case 'leather':
-        return 11;
-
-      case 'studded leather':
-      case 'hide':
-        return 12;
-
-      case 'chain shirt':
-        return 13;
-
-      case 'scale mail':
-      case 'breastplate':
-      case 'ring mail':
-        return 14;
-
-      case 'half plate':
-        return 15;
-
-      case 'chain mail':
-        return 16;
-
-      case 'splint':
-        return 17;
-
-      case 'plate':
-        return 18;
-
-      default:
-        return 0;
-    }
-  }
+  // private getAcBaseFromArmour(equippedArmourType: string): number {
+  //   switch (equippedArmourType.toLowerCase()) {
+  //     case 'padded':
+  //     case 'leather':
+  //       return 11;
+  //
+  //     case 'studded leather':
+  //     case 'hide':
+  //       return 12;
+  //
+  //     case 'chain shirt':
+  //       return 13;
+  //
+  //     case 'scale mail':
+  //     case 'breastplate':
+  //     case 'ring mail':
+  //       return 14;
+  //
+  //     case 'half plate':
+  //       return 15;
+  //
+  //     case 'chain mail':
+  //       return 16;
+  //
+  //     case 'splint':
+  //       return 17;
+  //
+  //     case 'plate':
+  //       return 18;
+  //
+  //     default:
+  //       return 0;
+  //   }
+  // }
 
   private getMaxDexFromArmour(equippedArmourType: string): number {
     switch (equippedArmourType.toLowerCase()) {
