@@ -69,6 +69,15 @@ export const initialCharacter: SourceCharacterState = {
       Wisdom: 1,
       Charisma: 1,
     },
+    {
+      level: 12,
+      Strength: 1,
+      Constitution: undefined,
+      Dexterity: undefined,
+      Intelligence: undefined,
+      Wisdom: 1,
+      Charisma: undefined,
+    },
   ],
   saveProficiencies: {
     Strength: undefined,
