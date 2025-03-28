@@ -383,6 +383,9 @@ import { MessagesModule } from 'primeng/messages';
         <p-fieldset legend="ASI (Level 8)" [toggleable]="true">
           <p>+1 Wisdom / +1 Charisma</p>
         </p-fieldset>
+        <p-fieldset legend="ASI (Level 12)" [toggleable]="true">
+          <p>+1 Wisdom / +1 Strength</p>
+        </p-fieldset>
       </div>
     </p-card>
   `,
