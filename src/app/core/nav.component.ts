@@ -87,9 +87,12 @@ export class NavComponent implements OnInit {
         route: 'cards',
       },
       {
-        label: 'Guides',
-        route: 'guides',
-        disabled: true,
+        label: 'Cards',
+        route: 'cards',
+      },
+      {
+        label: 'Tarot',
+        route: 'tarot',
       },
       {
         label: 'Configs',
