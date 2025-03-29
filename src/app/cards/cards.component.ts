@@ -40,13 +40,13 @@ import { OracleCard } from '../core/oracle-card.model';
 export class CardsComponent {
   equippedCards: OracleCard[] = deck
     .filter((c) => c.equipped)
-    .map((c) => ({ ...c, path: this.fixPath(c) }));
-  // .sort((a, b) => a.id - b.id);
+    .map((c) => ({ ...c, path: this.fixPath(c) }))
+    .sort((a, b) => a.id - b.id);
 
   nonEquippedCards: OracleCard[] = deck
     .filter((c) => !c.equipped && !c.readingsOnly)
-    .map((c) => ({ ...c, path: this.fixPath(c) }));
-  // .sort((a, b) => a.id - b.id);
+    .map((c) => ({ ...c, path: this.fixPath(c) }))
+    .sort((a, b) => a.id - b.id);
 
   fixPath(card: OracleCard, useAlt?: boolean) {
     const folder = '/assets/cards';
