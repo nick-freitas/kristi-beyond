@@ -21,7 +21,7 @@ import { abilities, ability } from '../data/dnd5e.system.data';
 export class CharacterService {
   private readonly sourceState$$: WritableSignal<SourceCharacterState>;
   public readonly character: Signal<CharacterState>;
-  private readonly latestVersion = '250328B';
+  private readonly latestVersion = '250329A';
 
   constructor() {
     let savedCharacter = localStorage.getItem('character');

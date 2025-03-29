@@ -130,7 +130,16 @@ export const initialCharacter: SourceCharacterState = {
     deathSaves: true,
     diseasePoison: true,
   },
-  rolledHP: [8, 5, 2, 6, 8, 4, 2, 6, 3, 2, 5, 5],
+  rolledHP: [
+    // Starting Level 1
+    8,
+    // Rolls Levels 2-10
+    5, 2, 6, 8, 4, 2, 6, 3, 2,
+    // Level 11
+    5,
+    // Level 12
+    6,
+  ],
   maxHpModifier: 0,
   maxHpOverride: 0,
   skillProficiencies: {

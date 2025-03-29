@@ -1,4 +1,5 @@
 @import "tailwindcss/base.css" layer(tw-base);
+@import "./preline-variants.css";
 @import "@angular/cdk/overlay-prebuilt.css";
 @import "primeng/resources/primeng.min.css" layer(primeng);
 @import "primeng/resources/themes/lara-dark-green/theme.css" ;

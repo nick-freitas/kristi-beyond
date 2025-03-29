@@ -192,7 +192,7 @@ The awakened shrub is friendly toward you. Absent commands from you, it does not
   {
     qty: 1,
     name: 'Wild Tarot Deck',
-    notes: 'Max Card Level: 4; Card Draws: 5; Cantrips Known: 4',
+    notes: 'Max Card Level: 5th; Card Draws: 5; Cantrips Known: 4',
     weight: 0,
     value: 0,
     requiresAttunement: false,

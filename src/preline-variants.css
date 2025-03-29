@@ -1,0 +1,74 @@
+/* Preline */
+@import 'preline/src/plugins/dropdown/variants.css';
+@import 'preline/src/plugins/remove-element/variants.css';
+@import 'preline/src/plugins/tooltip/variants.css';
+@import 'preline/src/plugins/accordion/variants.css';
+@import 'preline/src/plugins/tree-view/variants.css';
+@import 'preline/src/plugins/collapse/variants.css';
+@import 'preline/src/plugins/tabs/variants.css';
+@import 'preline/src/plugins/overlay/variants.css';
+@import 'preline/src/plugins/scrollspy/variants.css';
+@import 'preline/src/plugins/carousel/variants.css';
+@import 'preline/src/plugins/select/variants.css';
+@import 'preline/src/plugins/input-number/variants.css';
+@import 'preline/src/plugins/pin-input/variants.css';
+@import 'preline/src/plugins/strong-password/variants.css';
+@import 'preline/src/plugins/stepper/variants.css';
+@import 'preline/src/plugins/combobox/variants.css';
+@import 'preline/src/plugins/layout-splitter/variants.css';
+@import 'preline/src/plugins/scroll-nav/variants.css';
+@import 'preline/src/plugins/datatable/variants.css';
+@import 'preline/src/plugins/range-slider/variants.css';
+@import 'preline/src/plugins/file-upload/variants.css';
+@import 'preline/src/plugins/datepicker/variants.css';
+@import 'preline/src/plugins/theme-switch/variants.css';
+
+/* States */
+@custom-variant hs-success {
+  &.success {
+    @slot;
+  }
+
+  .success & {
+    @slot;
+  }
+}
+
+@custom-variant hs-error {
+
+  &.error {
+    @slot;
+  }
+
+  .error & {
+    @slot;
+  }
+}
+
+
+
+/* Apexcharts */
+@custom-variant hs-apexcharts-tooltip-dark {
+  &.dark {
+    @slot;
+  }
+}
+
+/* Sortable.js */
+@custom-variant hs-dragged {
+  &.dragged {
+    @slot;
+  }
+}
+
+/* Toastify */
+@custom-variant hs-toastify-on {
+
+  &.toastify.on {
+    @slot;
+  }
+
+  .toastify.on & {
+    @slot;
+  }
+}
