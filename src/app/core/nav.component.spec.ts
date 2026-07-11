@@ -21,4 +21,20 @@ describe('NavComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('links to the new view next to the classic portrait', () => {
+    const actions = fixture.nativeElement.querySelector(
+      '.classic-sheet-actions',
+    ) as HTMLElement | null;
+
+    expect(actions).withContext('classic sheet actions').not.toBeNull();
+    if (!actions) return;
+
+    const link = actions.querySelector('a') as HTMLAnchorElement | null;
+    const portrait = actions.querySelector('p-avatar');
+
+    expect(link?.textContent?.trim()).toBe('New View');
+    expect(link?.getAttribute('href')).toBe('/new-view');
+    expect(link?.nextElementSibling).toBe(portrait);
+  });
 });

@@ -47,14 +47,38 @@ import { RippleModule } from 'primeng/ripple';
           </ng-template>
         </ng-template>
         <ng-template pTemplate="end">
-          <div class="flex align-items-center gap-2">
+          <div class="classic-sheet-actions flex align-items-center gap-2">
+            <a class="new-view-link" routerLink="/new-view">New View</a>
             <p-avatar image="/assets/propic.png" size="xlarge" />
           </div>
         </ng-template>
       </p-menubar>
     </nav>
   `,
-  styles: ``,
+  styles: `
+    .new-view-link {
+      align-items: center;
+      border: 1px solid #fff;
+      border-radius: var(--border-radius);
+      color: #fff;
+      display: inline-flex;
+      font-weight: 600;
+      justify-content: center;
+      min-height: 2.5rem;
+      padding: 0.5rem 0.75rem;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .new-view-link:hover {
+      background: rgb(255 255 255 / 14%);
+    }
+
+    .new-view-link:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+    }
+  `,
 })
 export class NavComponent implements OnInit {
   items: MenuItem[] | undefined;
