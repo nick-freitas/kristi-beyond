@@ -106,6 +106,19 @@ export const vashaInventory: Inventory[] = [
     category: 'Vision',
     itemSpecific: {},
   },
+  {
+    qty: 1,
+    name: 'Goggles of Night',
+    notes:
+      'Wondrous item, uncommon. While worn, these dark lenses grant 60 feet of darkvision. If the wearer already has darkvision, its range increases by 60 feet.',
+    weight: 0,
+    value: 0,
+    requiresAttunement: false,
+    isAttuned: false,
+    equipped: false,
+    category: 'Eyewear',
+    itemSpecific: {},
+  },
 
   {
     qty: 1,
@@ -187,6 +200,24 @@ The awakened shrub is friendly toward you. Absent commands from you, it does not
       damage: '1d10',
       damageType: 'Slashing',
       properties: 'Heavy, Reach, Two-Handed',
+    },
+  },
+  {
+    qty: 1,
+    name: 'Shortsword',
+    notes: 'Martial, Melee, Finesse, Light',
+    weight: 2,
+    value: 10,
+    requiresAttunement: false,
+    isAttuned: false,
+    category: 'Weapon',
+    equipped: true,
+    itemSpecific: {
+      proficient: true,
+      attackModStat: 'Dexterity',
+      damage: '1d6',
+      damageType: 'Piercing',
+      properties: 'Finesse, Light',
     },
   },
   {

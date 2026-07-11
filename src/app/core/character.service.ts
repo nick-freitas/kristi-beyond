@@ -1,7 +1,6 @@
 import {
   computed,
   Injectable,
-  isDevMode,
   Signal,
   signal,
   WritableSignal,
@@ -15,31 +14,30 @@ import { CharacterState } from './character-state.model';
 import { initialCharacter } from '../data/initial-character.data';
 import { abilities, ability } from '../data/dnd5e.system.data';
 
+export type SpeciesProfile = Pick<
+  SourceCharacterState,
+  'race' | 'speeds' | 'resistances' | 'immunities' | 'advantages'
+> & {
+  racialAsis: Partial<SourceCharacterState['racialAsis']>;
+};
+
 @Injectable({
   providedIn: 'root',
 })
 export class CharacterService {
   private readonly sourceState$$: WritableSignal<SourceCharacterState>;
   public readonly character: Signal<CharacterState>;
-  private readonly latestVersion = '250329A';
+  private readonly latestVersion = '250711C';
 
   constructor() {
     let savedCharacter = localStorage.getItem('character');
-    if (isDevMode()) savedCharacter = null;
 
     if (savedCharacter) {
-      this.sourceState$$ = signal(JSON.parse(savedCharacter));
-
-      // after reset on new version
-      if (this.sourceState$$().version !== this.latestVersion) {
-        this.reloadCharacter();
-        this.sourceState$$.update((character) => ({
-          ...character,
-          version: this.latestVersion,
-        }));
-      }
+      const migrated = this.migrateSavedCharacter(JSON.parse(savedCharacter));
+      this.sourceState$$ = signal(migrated);
+      localStorage.setItem('character', JSON.stringify(migrated));
     } else {
-      this.sourceState$$ = signal(initialCharacter);
+      this.sourceState$$ = signal(this.freshInitialCharacter());
     }
 
     this.character = computed(() => {
@@ -51,36 +49,33 @@ export class CharacterService {
       const oracleLevel = character.classes.find((c) =>
         c.class.toLocaleLowerCase().includes('oracle'),
       )?.level;
-      if (!oracleLevel) {
-        throw new Error('Could not find Oracle Class for level count');
-      } else if (oracleLevel < 1) {
+      const primaryFeatureLevel = oracleLevel ?? character.classes[0]?.level;
+      if (!primaryFeatureLevel || primaryFeatureLevel < 1) {
         throw new Error('Could not find Oracle Level');
-      } else if (oracleLevel < 9) {
+      } else if (primaryFeatureLevel < 9) {
         character.rageDamage = 2;
-      } else if (oracleLevel < 16) {
+      } else if (primaryFeatureLevel < 16) {
         character.rageDamage = 3;
-      } else if (oracleLevel < 21) {
+      } else if (primaryFeatureLevel < 21) {
         character.rageDamage = 4;
       } else {
         throw new Error('Oracle Level exceeds 20');
       }
 
-      if (character.rage) {
-        character.saveAdvantages.Strength = true;
-        character.abilityAdvantages.Strength = true;
-
-        character.resistances.bludgeoning = true;
-        character.resistances.piercing = true;
-        character.resistances.slashing = true;
-      } else {
-        character.saveAdvantages.Strength = false;
-        character.abilityAdvantages.Strength = false;
-
-        // todo: this should not work this way but im in a hurry
-        character.resistances.bludgeoning = false;
-        character.resistances.piercing = false;
-        character.resistances.slashing = false;
-      }
+      const saveAdvantages = {
+        ...character.saveAdvantages,
+        Strength: character.rage ? true : character.saveAdvantages.Strength,
+      };
+      const abilityAdvantages = {
+        ...character.abilityAdvantages,
+        Strength: character.rage ? true : character.abilityAdvantages.Strength,
+      };
+      const resistances = {
+        ...character.resistances,
+        bludgeoning: character.rage ? true : character.resistances.bludgeoning,
+        piercing: character.rage ? true : character.resistances.piercing,
+        slashing: character.rage ? true : character.resistances.slashing,
+      };
 
       const proficiency = this.calcProficiencyModifier(totalLevel);
       let equipped = character.inventory.filter((i) => i.equipped);
@@ -188,11 +183,15 @@ export class CharacterService {
       //   this.errors.set(`Rolled HP plus Con Modifier is less than or equal to 0`);
       // }
 
-      const totalMaxHP = character.maxHpOverride
-        ? character.maxHpOverride
-        : totalInitialHP + character.maxHpModifier;
+      const totalMaxHP = Math.max(
+        1,
+        character.maxHpOverride
+          ? character.maxHpOverride
+          : totalInitialHP + character.maxHpModifier,
+      );
 
       if (character.currentHp === undefined) character.currentHp = totalMaxHP;
+      if (character.currentHp! < 0) character.currentHp = 0;
       if (character.currentHp! > totalMaxHP) character.currentHp = totalMaxHP;
 
       let saveModifiers: abilities<number> = {
@@ -310,6 +309,9 @@ export class CharacterService {
 
       return {
         ...character,
+        saveAdvantages,
+        abilityAdvantages,
+        resistances,
         totalLevel,
         abilityScores,
         abilityModifiers,
@@ -409,6 +411,308 @@ export class CharacterService {
     };
 
     return abilityScores;
+  }
+
+  updateIdentity(
+    changes: Partial<
+      Pick<SourceCharacterState, 'name' | 'race' | 'background' | 'alignment'>
+    >,
+  ) {
+    this.updateSourceState((character) => ({
+      ...character,
+      name: this.requiredText(changes.name, character.name),
+      race: this.requiredText(changes.race, character.race),
+      background: this.requiredText(changes.background, character.background),
+      alignment: this.requiredText(changes.alignment, character.alignment),
+    }));
+  }
+
+  updateSpeciesProfile(profile: SpeciesProfile) {
+    this.updateSourceState((character) => {
+      const speeds: SourceCharacterState['speeds'] = {
+        land: this.clampInteger(
+          profile.speeds.land,
+          0,
+          Number.MAX_SAFE_INTEGER,
+          character.speeds.land,
+        ),
+      };
+      for (const key of ['burrow', 'climb', 'fly', 'swim'] as const) {
+        const value = profile.speeds[key];
+        if (value !== undefined) {
+          speeds[key] = this.clampInteger(value, 0, Number.MAX_SAFE_INTEGER, 0);
+        }
+      }
+
+      return {
+        ...character,
+        race: this.requiredText(profile.race, character.race),
+        speeds,
+        racialAsis: this.updateOptionalAbilities(
+          {
+            Strength: undefined,
+            Dexterity: undefined,
+            Constitution: undefined,
+            Intelligence: undefined,
+            Wisdom: undefined,
+            Charisma: undefined,
+          },
+          profile.racialAsis,
+          -5,
+          5,
+        ),
+        resistances: { ...profile.resistances },
+        immunities: { ...profile.immunities },
+        advantages: { ...profile.advantages },
+      };
+    });
+  }
+
+  updatePrimaryClass(
+    changes: Partial<SourceCharacterState['classes'][number]>,
+  ) {
+    this.updateSourceState((character) => {
+      const current = character.classes[0] ?? {
+        class: 'Wild Oracle',
+        subclass: 'Fate of the Chosen',
+        level: 1,
+        hitDie: 8,
+      };
+      const level = this.clampInteger(changes.level, 1, 20, current.level);
+      const hitDie = this.supportedHitDie(changes.hitDie, current.hitDie);
+      const rolledHP = this.alignRolledHp(character.rolledHP, level, hitDie);
+
+      return {
+        ...character,
+        classes: [
+          {
+            class: this.requiredText(changes.class, current.class),
+            subclass: this.requiredText(changes.subclass, current.subclass),
+            level,
+            hitDie,
+          },
+          ...character.classes.slice(1),
+        ],
+        hitDieType: `d${hitDie}`,
+        rolledHP,
+        currentHitDie: this.clampInteger(
+          character.currentHitDie,
+          0,
+          level,
+          level,
+        ),
+      };
+    });
+  }
+
+  updateRolledHp(levelIndex: number, roll: number) {
+    this.updateSourceState((character) => {
+      const index = Math.trunc(Number(levelIndex));
+      if (
+        !Number.isFinite(index) ||
+        index < 0 ||
+        index >= character.classes[0].level
+      ) {
+        return character;
+      }
+
+      const hitDie = character.classes[0].hitDie;
+      const rolledHP = this.alignRolledHp(
+        character.rolledHP,
+        character.classes[0].level,
+        hitDie,
+      );
+      rolledHP[index] = this.clampInteger(roll, 1, hitDie, rolledHP[index]);
+      return { ...character, rolledHP };
+    });
+  }
+
+  updateRolledStats(changes: Partial<abilities<number>>) {
+    this.updateSourceState((character) => ({
+      ...character,
+      rolledStats: this.updateAbilities(character.rolledStats, changes, 1, 20),
+    }));
+  }
+
+  updateRacialAsis(changes: Partial<abilities<number | undefined>>) {
+    this.updateSourceState((character) => ({
+      ...character,
+      racialAsis: this.updateOptionalAbilities(
+        character.racialAsis,
+        changes,
+        -5,
+        5,
+      ),
+    }));
+  }
+
+  updateOverrideAbilityScores(changes: Partial<abilities<number | undefined>>) {
+    this.updateSourceState((character) => ({
+      ...character,
+      overrideAbilityScores: this.updateOptionalAbilities(
+        character.overrideAbilityScores,
+        changes,
+        1,
+        30,
+      ),
+    }));
+  }
+
+  setLanguages(languages: string[]) {
+    this.updateSourceState((character) => ({
+      ...character,
+      languages: this.cleanStringList(languages),
+    }));
+  }
+
+  setTools(tools: string[]) {
+    this.updateSourceState((character) => ({
+      ...character,
+      tools: this.cleanStringList(tools),
+    }));
+  }
+
+  updateSpeeds(changes: Partial<SourceCharacterState['speeds']>) {
+    this.updateSourceState((character) => {
+      const speeds = { ...character.speeds };
+      for (const key of ['land', 'burrow', 'climb', 'fly', 'swim'] as const) {
+        if (!(key in changes)) continue;
+        const value = changes[key];
+        if (value === undefined && key !== 'land') {
+          delete speeds[key];
+        } else {
+          speeds[key] = this.clampInteger(
+            value,
+            0,
+            Number.MAX_SAFE_INTEGER,
+            speeds[key] ?? 0,
+          );
+        }
+      }
+      return { ...character, speeds };
+    });
+  }
+
+  updateSkillProficiencies(
+    changes: Partial<SourceCharacterState['skillProficiencies']>,
+  ) {
+    this.updateSourceState((character) => ({
+      ...character,
+      skillProficiencies: {
+        ...character.skillProficiencies,
+        ...changes,
+      },
+    }));
+  }
+
+  updateSaveProficiencies(
+    changes: Partial<SourceCharacterState['saveProficiencies']>,
+  ) {
+    this.updateSourceState((character) => ({
+      ...character,
+      saveProficiencies: {
+        ...character.saveProficiencies,
+        ...changes,
+      },
+    }));
+  }
+
+  setArmourProficiencies(proficiencies: string[]) {
+    this.updateSourceState((character) => ({
+      ...character,
+      armourProficiencies: this.cleanStringList(proficiencies),
+    }));
+  }
+
+  setWeaponProficiencies(proficiencies: string[]) {
+    this.updateSourceState((character) => ({
+      ...character,
+      weaponProficiencies: this.cleanStringList(proficiencies),
+    }));
+  }
+
+  updateResistances(changes: Partial<SourceCharacterState['resistances']>) {
+    this.updateSourceState((character) => ({
+      ...character,
+      resistances: { ...character.resistances, ...changes },
+    }));
+  }
+
+  updateImmunities(changes: Partial<SourceCharacterState['immunities']>) {
+    this.updateSourceState((character) => ({
+      ...character,
+      immunities: { ...character.immunities, ...changes },
+    }));
+  }
+
+  updateAdvantages(changes: Partial<SourceCharacterState['advantages']>) {
+    this.updateSourceState((character) => ({
+      ...character,
+      advantages: { ...character.advantages, ...changes },
+    }));
+  }
+
+  updateHpSettings(
+    changes: Partial<
+      Pick<SourceCharacterState, 'maxHpModifier' | 'maxHpOverride'>
+    >,
+  ) {
+    const minimumModifier = 1 - this.character().totalInitialHP;
+    this.updateSourceState((character) => ({
+      ...character,
+      maxHpModifier:
+        changes.maxHpModifier === undefined
+          ? character.maxHpModifier
+          : this.clampInteger(
+              changes.maxHpModifier,
+              minimumModifier,
+              Number.MAX_SAFE_INTEGER,
+              character.maxHpModifier,
+            ),
+      maxHpOverride:
+        changes.maxHpOverride === undefined
+          ? character.maxHpOverride
+          : this.clampInteger(
+              changes.maxHpOverride,
+              0,
+              Number.MAX_SAFE_INTEGER,
+              character.maxHpOverride,
+            ),
+    }));
+  }
+
+  setEquippedArmourType(value: string) {
+    this.updateSourceState((character) => ({
+      ...character,
+      equippedArmourType: this.requiredText(
+        value,
+        character.equippedArmourType,
+      ),
+    }));
+  }
+
+  setWealth(changes: Partial<SourceCharacterState['wealth']>) {
+    this.updateSourceState((character) => {
+      const wealth = { ...character.wealth };
+      const wealthTransaction = { ...character.wealthTransaction };
+
+      for (const currency of ['gold', 'silver', 'copper'] as const) {
+        if (!(currency in changes)) continue;
+        const nextValue = this.clampInteger(
+          changes[currency],
+          0,
+          Number.MAX_SAFE_INTEGER,
+          wealth[currency],
+        );
+        const delta = nextValue - wealth[currency];
+        wealth[currency] = nextValue;
+        if (delta !== 0) {
+          wealthTransaction[currency] = [delta, ...wealthTransaction[currency]];
+        }
+      }
+
+      return { ...character, wealth, wealthTransaction };
+    });
   }
 
   heal(health: number) {
@@ -625,6 +929,21 @@ export class CharacterService {
     });
   }
 
+  changeExhaustion(change: number) {
+    if (!Number.isFinite(change)) return;
+
+    this.sourceState$$.update((c) => ({
+      ...c,
+      conditions: {
+        ...c.conditions,
+        exhaustion: Math.min(
+          6,
+          Math.max(0, (c.conditions.exhaustion || 0) + change),
+        ),
+      },
+    }));
+  }
+
   changeTempHp(tempHp: number) {
     this.sourceState$$.update((c) => ({ ...c, tempHp }));
   }
@@ -637,14 +956,18 @@ export class CharacterService {
   }
 
   reloadCharacter() {
-    this.sourceState$$.set(initialCharacter);
+    this.sourceState$$.set(this.freshInitialCharacter());
     return true;
   }
 
-  changeMaxHpMod(maxHpModifier: any) {
+  changeMaxHpMod(maxHpModifier: number) {
+    const requestedModifier = Number(maxHpModifier);
+    if (!Number.isFinite(requestedModifier)) return;
+
+    const minimumModifier = 1 - this.character().totalInitialHP;
     this.sourceState$$.update((c) => ({
       ...c,
-      maxHpModifier,
+      maxHpModifier: Math.max(minimumModifier, Math.trunc(requestedModifier)),
     }));
   }
 
@@ -754,6 +1077,276 @@ export class CharacterService {
       ...c,
       inventory: [...c.inventory.map((i) => (i.name === item.name ? item : i))],
     }));
+  }
+
+  updateInventoryItem(index: number, changes: Partial<Inventory>): boolean {
+    let updated = false;
+    this.updateSourceState((character) => {
+      const safeIndex = Math.trunc(Number(index));
+      if (
+        !Number.isFinite(safeIndex) ||
+        safeIndex < 0 ||
+        safeIndex >= character.inventory.length
+      ) {
+        return character;
+      }
+
+      const current = character.inventory[safeIndex];
+      const inventory = [...character.inventory];
+      inventory[safeIndex] = this.normaliseInventoryItem(
+        {
+          ...current,
+          ...changes,
+          itemSpecific: changes.itemSpecific
+            ? { ...current.itemSpecific, ...changes.itemSpecific }
+            : current.itemSpecific,
+        },
+        current,
+      );
+      updated = true;
+      return { ...character, inventory };
+    });
+    return updated;
+  }
+
+  addInventoryItem(item: Partial<Inventory> = {}): number {
+    let addedIndex = -1;
+    this.updateSourceState((character) => {
+      const defaultItem: Inventory = {
+        qty: 1,
+        name: 'New Item',
+        value: 0,
+        weight: 0,
+        notes: '',
+        requiresAttunement: false,
+        isAttuned: false,
+        equipped: false,
+        category: 'Adventuring Gear',
+        itemSpecific: {},
+      };
+      const added = this.normaliseInventoryItem(
+        {
+          ...defaultItem,
+          ...item,
+          itemSpecific: { ...defaultItem.itemSpecific, ...item.itemSpecific },
+        },
+        defaultItem,
+      );
+      addedIndex = character.inventory.length;
+      return { ...character, inventory: [...character.inventory, added] };
+    });
+    return addedIndex;
+  }
+
+  removeInventoryItem(index: number): boolean {
+    let removed = false;
+    this.updateSourceState((character) => {
+      const safeIndex = Math.trunc(Number(index));
+      if (
+        !Number.isFinite(safeIndex) ||
+        safeIndex < 0 ||
+        safeIndex >= character.inventory.length
+      ) {
+        return character;
+      }
+
+      removed = true;
+      return {
+        ...character,
+        inventory: character.inventory.filter((_, itemIndex) => {
+          return itemIndex !== safeIndex;
+        }),
+      };
+    });
+    return removed;
+  }
+
+  private updateSourceState(
+    update: (character: SourceCharacterState) => SourceCharacterState,
+  ) {
+    this.sourceState$$.update(update);
+    this.character();
+  }
+
+  private requiredText(value: string | undefined, fallback: string): string {
+    if (typeof value !== 'string') return fallback;
+    return value.trim() || fallback.trim() || 'Unknown';
+  }
+
+  private clampInteger(
+    value: number | undefined,
+    minimum: number,
+    maximum: number,
+    fallback: number,
+  ): number {
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) return fallback;
+    return Math.min(maximum, Math.max(minimum, Math.trunc(numericValue)));
+  }
+
+  private clampNumber(
+    value: number | undefined,
+    minimum: number,
+    maximum: number,
+    fallback: number,
+  ): number {
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) return fallback;
+    return Math.min(maximum, Math.max(minimum, numericValue));
+  }
+
+  private supportedHitDie(value: number | undefined, fallback: number): number {
+    const supported = [6, 8, 10, 12];
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) return fallback;
+    return supported.reduce((nearest, candidate) =>
+      Math.abs(candidate - numericValue) < Math.abs(nearest - numericValue)
+        ? candidate
+        : nearest,
+    );
+  }
+
+  private alignRolledHp(
+    currentRolls: number[],
+    level: number,
+    hitDie: number,
+  ): number[] {
+    const averageRoll = Math.floor(hitDie / 2) + 1;
+    return Array.from({ length: level }, (_, index) =>
+      this.clampInteger(currentRolls[index], 1, hitDie, averageRoll),
+    );
+  }
+
+  private updateAbilities(
+    current: abilities<number>,
+    changes: Partial<abilities<number>>,
+    minimum: number,
+    maximum: number,
+  ): abilities<number> {
+    const updated = { ...current };
+    for (const abilityName of this.abilityNames()) {
+      if (!(abilityName in changes)) continue;
+      updated[abilityName] = this.clampInteger(
+        changes[abilityName],
+        minimum,
+        maximum,
+        current[abilityName],
+      );
+    }
+    return updated;
+  }
+
+  private updateOptionalAbilities(
+    current: abilities<number | undefined>,
+    changes: Partial<abilities<number | undefined>>,
+    minimum: number,
+    maximum: number,
+  ): abilities<number | undefined> {
+    const updated = { ...current };
+    for (const abilityName of this.abilityNames()) {
+      if (!(abilityName in changes)) continue;
+      const value = changes[abilityName];
+      updated[abilityName] =
+        value === undefined
+          ? undefined
+          : this.clampInteger(
+              value,
+              minimum,
+              maximum,
+              current[abilityName] ?? minimum,
+            );
+    }
+    return updated;
+  }
+
+  private abilityNames(): ability[] {
+    return [
+      'Strength',
+      'Dexterity',
+      'Constitution',
+      'Intelligence',
+      'Wisdom',
+      'Charisma',
+    ];
+  }
+
+  private cleanStringList(values: string[]): string[] {
+    if (!Array.isArray(values)) return [];
+    return Array.from(
+      new Set(
+        values
+          .filter((value): value is string => typeof value === 'string')
+          .map((value) => value.trim())
+          .filter(Boolean),
+      ),
+    );
+  }
+
+  private normaliseInventoryItem(
+    item: Inventory,
+    fallback: Inventory,
+  ): Inventory {
+    const requiresAttunement = Boolean(item.requiresAttunement);
+    return {
+      ...item,
+      name: this.requiredText(item.name, fallback.name),
+      category: this.requiredText(item.category, fallback.category),
+      qty: this.clampInteger(
+        item.qty,
+        0,
+        Number.MAX_SAFE_INTEGER,
+        fallback.qty,
+      ),
+      value: this.clampNumber(
+        item.value,
+        0,
+        Number.MAX_SAFE_INTEGER,
+        fallback.value,
+      ),
+      weight: this.clampNumber(
+        item.weight,
+        0,
+        Number.MAX_SAFE_INTEGER,
+        fallback.weight,
+      ),
+      notes: typeof item.notes === 'string' ? item.notes : fallback.notes,
+      requiresAttunement,
+      isAttuned: requiresAttunement && Boolean(item.isAttuned),
+      equipped: Boolean(item.equipped),
+      itemSpecific: { ...fallback.itemSpecific, ...item.itemSpecific },
+    };
+  }
+
+  private freshInitialCharacter(): SourceCharacterState {
+    const character = JSON.parse(
+      JSON.stringify(initialCharacter),
+    ) as SourceCharacterState;
+    return { ...character, version: this.latestVersion };
+  }
+
+  private migrateSavedCharacter(
+    character: SourceCharacterState,
+  ): SourceCharacterState {
+    if (character.version === this.latestVersion) return character;
+
+    const inventory = Array.isArray(character.inventory)
+      ? [...character.inventory]
+      : [];
+    for (const itemName of ['Shortsword', 'Goggles of Night']) {
+      const hasItem = inventory.some(
+        (item) =>
+          item.name?.trim().toLocaleLowerCase() ===
+          itemName.toLocaleLowerCase(),
+      );
+      const bundledItem = initialCharacter.inventory.find(
+        (item) => item.name === itemName,
+      );
+      if (!hasItem && bundledItem) {
+        inventory.push(structuredClone(bundledItem));
+      }
+    }
+
+    return { ...character, inventory, version: this.latestVersion };
   }
 }
 

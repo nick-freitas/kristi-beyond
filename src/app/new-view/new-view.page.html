@@ -1,0 +1,1527 @@
+<main class="nv-sheet" [style.--nv-wallpaper]="wallpaperStyle">
+  <header class="nv-character-header">
+    <div class="nv-identity">
+      <img
+        class="nv-portrait"
+        src="/assets/propic.png"
+        alt="Portrait of Vasha Taltos"
+      />
+      <div>
+        <h1>{{ character().name }}</h1>
+        <p class="nv-class-line">
+          {{ character().race }} · {{ character().classes[0].class }} {{
+          character().classes[0].level }}
+          <span aria-hidden="true">•</span>
+          {{ character().classes[0].subclass }}
+        </p>
+        <p class="nv-kicker">Level {{ character().totalLevel }}</p>
+      </div>
+    </div>
+
+    <div class="nv-header-actions">
+      <a class="nv-quiet-link" routerLink="/stats">
+        <span aria-hidden="true">↗</span> Classic sheet
+      </a>
+      <button
+        class="nv-header-button"
+        type="button"
+        (click)="openRestDrawer('short', $event.currentTarget)"
+      >
+        <span aria-hidden="true">☕</span> Short rest
+      </button>
+      <button
+        class="nv-header-button"
+        type="button"
+        (click)="openRestDrawer('long', $event.currentTarget)"
+      >
+        <span aria-hidden="true">☾</span> Long rest
+      </button>
+      <button
+        class="nv-icon-button nv-icon-button--header"
+        type="button"
+        aria-label="Open character settings"
+        (click)="openDrawer('settings', $event.currentTarget)"
+      >
+        ⚙
+      </button>
+    </div>
+  </header>
+
+  <section class="nv-quick-strip" aria-label="Quick character statistics">
+    <div class="nv-abilities">
+      @for (ability of abilityDefinitions; track ability.key) {
+      <button
+        class="nv-ability"
+        type="button"
+        [attr.aria-label]="
+            'Roll ' +
+            ability.key +
+            ' check, modifier ' +
+            formatModifier(character().abilityModifiers[ability.key])
+          "
+        (click)="rollAbility(ability.key)"
+      >
+        <span class="nv-ability__label">{{ ability.short }}</span>
+        <strong
+          >{{ formatModifier(character().abilityModifiers[ability.key])
+          }}</strong
+        >
+        <span class="nv-ability__score"
+          >{{ character().abilityScores[ability.key] }}</span
+        >
+        @if (character().abilityAdvantages[ability.key]) {
+        <span class="nv-advantage-mark" title="Advantage">A</span>
+        }
+      </button>
+      }
+    </div>
+
+    <div class="nv-quick-facts">
+      <div class="nv-fact nv-fact--proficiency">
+        <span>Proficiency</span>
+        <strong>{{ formatModifier(character().proficiency) }}</strong>
+        <small>bonus</small>
+      </div>
+      <div class="nv-fact nv-fact--speed">
+        <span>Walking</span>
+        <strong>{{ character().speeds.land }}</strong>
+        <small
+          >swim {{ character().speeds.swim }} · climb {{
+          character().speeds.climb }}</small
+        >
+      </div>
+      <button
+        class="nv-fact nv-fact--button nv-fact--inspiration"
+        type="button"
+        [class.is-active]="character().inspiration"
+        [attr.aria-pressed]="character().inspiration === 1"
+        (click)="characterService.toggleInspiration()"
+      >
+        <span>Inspiration</span>
+        <strong aria-hidden="true"
+          >{{ character().inspiration ? '✦' : '◇' }}</strong
+        >
+        <small>{{ character().inspiration ? 'ready' : 'empty' }}</small>
+      </button>
+      <button
+        class="nv-fact nv-fact--button nv-fact--rage"
+        type="button"
+        [class.is-active]="character().rage"
+        [attr.aria-pressed]="character().rage === 1"
+        [attr.aria-label]="character().rage ? 'End rage' : 'Enter rage'"
+        (click)="characterService.toggleRage()"
+      >
+        <span>Rage</span>
+        <strong aria-hidden="true">♨</strong>
+        <small>{{ character().rage ? 'Rage active' : 'Enter rage' }}</small>
+      </button>
+      <button
+        class="nv-fact nv-fact--hp nv-fact--button"
+        type="button"
+        aria-label="Open hit point management"
+        (click)="openDrawer('hp', $event.currentTarget)"
+      >
+        <span>Hit points</span>
+        <strong
+          >{{ character().currentHp }}<em
+            >/{{ character().totalMaxHP }}</em
+          ></strong
+        >
+        <small>{{ character().tempHp }} temporary</small>
+      </button>
+    </div>
+  </section>
+
+  <div class="nv-sheet-grid">
+    <aside
+      class="nv-reference-rail"
+      [class.is-collapsed]="referenceCollapsed()"
+      aria-label="Saves and proficiencies"
+    >
+      <button
+        class="nv-rail-toggle"
+        type="button"
+        [attr.aria-expanded]="!referenceCollapsed()"
+        aria-controls="nv-reference-content"
+        (click)="referenceCollapsed.set(!referenceCollapsed())"
+      >
+        <span>Defense & proficiency reference</span>
+        <strong>{{ referenceCollapsed() ? 'Show' : 'Hide' }}</strong>
+      </button>
+      <div id="nv-reference-content" class="nv-reference-content">
+        <section class="nv-panel nv-saves-panel">
+          <div class="nv-panel-heading">
+            <span>Defense ledger</span>
+            <h2>Saving Throws</h2>
+          </div>
+          <div class="nv-save-grid">
+            @for (ability of abilityDefinitions; track ability.key) {
+            <button
+              class="nv-save"
+              type="button"
+              (click)="rollSave(ability.key)"
+              [attr.aria-label]="
+                'Roll ' +
+                ability.key +
+                ' saving throw, modifier ' +
+                formatModifier(character().saveModifiers[ability.key])
+              "
+            >
+              <span
+                class="nv-prof-dot"
+                [class.is-proficient]="abilityIsProficient(ability.key)"
+                aria-hidden="true"
+              ></span>
+              <span>{{ ability.short }}</span>
+              <strong
+                >{{ formatModifier(character().saveModifiers[ability.key])
+                }}</strong
+              >
+              @if (character().saveAdvantages[ability.key]) {
+              <small>ADV</small>
+              }
+            </button>
+            }
+          </div>
+        </section>
+
+        <section class="nv-panel nv-passives-panel">
+          <div class="nv-panel-heading">
+            <span>Always watching</span>
+            <h2>Passive Senses</h2>
+          </div>
+          <dl class="nv-passive-list">
+            <div>
+              <dt>Perception</dt>
+              <dd>{{ character().passives.perception }}</dd>
+            </div>
+            <div>
+              <dt>Investigation</dt>
+              <dd>{{ character().passives.investigation }}</dd>
+            </div>
+            <div>
+              <dt>Insight</dt>
+              <dd>{{ character().passives.insight }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="nv-panel nv-proficiency-panel">
+          <div class="nv-panel-heading">
+            <span>Training & speech</span>
+            <h2>Proficiencies</h2>
+          </div>
+          <div class="nv-rule-list">
+            <div>
+              <h3>Armor</h3>
+              <p>{{ character().armourProficiencies.join(', ') || 'None' }}</p>
+            </div>
+            <div>
+              <h3>Weapons</h3>
+              <p>{{ character().weaponProficiencies.join(', ') || 'None' }}</p>
+            </div>
+            <div>
+              <h3>Tools</h3>
+              <p>{{ character().tools.join(', ') || 'None' }}</p>
+            </div>
+            <div>
+              <h3>Languages</h3>
+              <p>{{ character().languages.join(', ') || 'None' }}</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <section
+      class="nv-panel nv-skills-panel"
+      [class.is-collapsed]="skillsCollapsed()"
+      aria-labelledby="skills-title"
+    >
+      <button
+        class="nv-rail-toggle"
+        type="button"
+        [attr.aria-expanded]="!skillsCollapsed()"
+        aria-controls="nv-skills-content"
+        (click)="skillsCollapsed.set(!skillsCollapsed())"
+      >
+        <span>Skill reference</span>
+        <strong>{{ skillsCollapsed() ? 'Show' : 'Hide' }}</strong>
+      </button>
+      <div id="nv-skills-content" class="nv-skills-content">
+        <div class="nv-panel-heading nv-panel-heading--skills">
+          <span>Tap any row to roll</span>
+          <h2 id="skills-title">Skills</h2>
+        </div>
+        <div class="nv-skill-head" aria-hidden="true">
+          <span>Prof.</span><span>Ability</span><span>Skill</span
+          ><span>Bonus</span>
+        </div>
+        <div class="nv-skill-list">
+          @for (skill of skills; track skill.key) {
+          <button
+            class="nv-skill"
+            type="button"
+            (click)="rollSkill(skill)"
+            [attr.aria-label]="
+              'Roll ' +
+              skill.label +
+              ', modifier ' +
+              formatModifier(character().skillModifiers[skill.key])
+            "
+          >
+            <span
+              class="nv-prof-dot"
+              [class.is-proficient]="skillIsProficient(skill.key)"
+              aria-hidden="true"
+            ></span>
+            <span class="nv-skill__ability">{{ skill.shortAbility }}</span>
+            <span class="nv-skill__name">{{ skill.label }}</span>
+            <strong
+              >{{ formatModifier(character().skillModifiers[skill.key])
+              }}</strong
+            >
+            @if (skillRollMode(skill) === 'advantage') {
+            <small class="nv-skill-advantage">ADV</small>
+            }
+          </button>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="nv-play-space">
+      <div class="nv-combat-summary">
+        <button
+          class="nv-combat-stat nv-combat-stat--initiative"
+          type="button"
+          (click)="rollInitiative()"
+          [attr.aria-label]="
+            'Roll initiative, modifier ' + formatModifier(character().initiative)
+          "
+        >
+          <span>Initiative @if (hasInitiativeAdvantage()) { · ADV }</span>
+          <strong>{{ formatModifier(character().initiative) }}</strong>
+        </button>
+        <div class="nv-ac-shield" aria-label="Armor class">
+          <span>Armor</span>
+          <strong>{{ character().ac }}</strong>
+          <small>class</small>
+        </div>
+        <button
+          class="nv-defense-summary"
+          type="button"
+          (click)="openDrawer('conditions', $event.currentTarget)"
+        >
+          <span>
+            <small>Defenses</small>
+            <strong>{{ resistanceLabels().join(', ') || 'None' }}</strong>
+          </span>
+          <span>
+            <small>Conditions</small>
+            <strong>{{ activeConditionLabels().join(', ') || 'Clear' }}</strong>
+          </span>
+        </button>
+      </div>
+
+      <section class="nv-workspace" aria-label="Character play workspace">
+        <nav class="nv-tabs" role="tablist" aria-label="Character sections">
+          <button
+            id="nv-tab-actions"
+            type="button"
+            role="tab"
+            aria-controls="nv-workspace-panel"
+            [attr.aria-selected]="activeTab() === 'actions'"
+            [attr.tabindex]="activeTab() === 'actions' ? 0 : -1"
+            [class.is-active]="activeTab() === 'actions'"
+            (click)="setActiveTab('actions')"
+            (keydown)="onWorkspaceTabKeydown($event, 'actions')"
+          >
+            Actions
+          </button>
+          <button
+            id="nv-tab-spells"
+            type="button"
+            role="tab"
+            aria-controls="nv-workspace-panel"
+            [attr.aria-selected]="activeTab() === 'spells'"
+            [attr.tabindex]="activeTab() === 'spells' ? 0 : -1"
+            [class.is-active]="activeTab() === 'spells'"
+            (click)="setActiveTab('spells')"
+            (keydown)="onWorkspaceTabKeydown($event, 'spells')"
+          >
+            Spells
+          </button>
+          <button
+            id="nv-tab-cards"
+            type="button"
+            role="tab"
+            aria-controls="nv-workspace-panel"
+            [attr.aria-selected]="activeTab() === 'cards'"
+            [attr.tabindex]="activeTab() === 'cards' ? 0 : -1"
+            [class.is-active]="activeTab() === 'cards'"
+            (click)="setActiveTab('cards')"
+            (keydown)="onWorkspaceTabKeydown($event, 'cards')"
+          >
+            Cards & Tarot
+          </button>
+          <button
+            id="nv-tab-inventory"
+            type="button"
+            role="tab"
+            aria-controls="nv-workspace-panel"
+            [attr.aria-selected]="activeTab() === 'inventory'"
+            [attr.tabindex]="activeTab() === 'inventory' ? 0 : -1"
+            [class.is-active]="activeTab() === 'inventory'"
+            (click)="setActiveTab('inventory')"
+            (keydown)="onWorkspaceTabKeydown($event, 'inventory')"
+          >
+            Inventory
+          </button>
+          <button
+            id="nv-tab-features"
+            type="button"
+            role="tab"
+            aria-controls="nv-workspace-panel"
+            [attr.aria-selected]="activeTab() === 'features'"
+            [attr.tabindex]="activeTab() === 'features' ? 0 : -1"
+            [class.is-active]="activeTab() === 'features'"
+            (click)="setActiveTab('features')"
+            (keydown)="onWorkspaceTabKeydown($event, 'features')"
+          >
+            Features & Traits
+          </button>
+          <button
+            id="nv-tab-notes"
+            type="button"
+            role="tab"
+            aria-controls="nv-workspace-panel"
+            [attr.aria-selected]="activeTab() === 'notes'"
+            [attr.tabindex]="activeTab() === 'notes' ? 0 : -1"
+            [class.is-active]="activeTab() === 'notes'"
+            (click)="setActiveTab('notes')"
+            (keydown)="onWorkspaceTabKeydown($event, 'notes')"
+          >
+            Notes
+          </button>
+        </nav>
+
+        <div
+          id="nv-workspace-panel"
+          class="nv-workspace-body"
+          [class.nv-workspace-body--cards]="activeTab() === 'cards'"
+          role="tabpanel"
+          [attr.aria-labelledby]="'nv-tab-' + activeTab()"
+        >
+          @switch (activeTab()) { @case ('actions') {
+          <div
+            class="nv-action-filters"
+            role="group"
+            aria-label="Filter actions"
+          >
+            @for (filter of actionFilters; track filter.id) {
+            <button
+              type="button"
+              [class.is-active]="actionFilter() === filter.id"
+              [attr.aria-pressed]="actionFilter() === filter.id"
+              (click)="actionFilter.set(filter.id)"
+            >
+              {{ filter.label }}
+            </button>
+            }
+          </div>
+
+          <div class="nv-resource-ribbon">
+            <span><strong>Draws</strong> 5 / rest</span>
+            <span><strong>Fate's Hand</strong> 4 cards</span>
+            <span
+              ><strong>Creeping Hand</strong> {{
+              character().featureUsages.creepingHand }}/5</span
+            >
+            <span
+              ><strong>Rage damage</strong> +{{ character().rageDamage }}</span
+            >
+          </div>
+
+          @if (actionMatches('attack')) {
+          <section class="nv-action-section">
+            <div class="nv-subheading">
+              <span>01</span>
+              <h3>Attacks</h3>
+            </div>
+            <div class="nv-action-grid">
+              @for (item of character().equipped; track item.name) { @if
+              (item.category === 'Weapon') {
+              <article class="nv-action-card nv-action-card--featured">
+                <div class="nv-action-card__topline">
+                  <span>Weapon · {{ item.itemSpecific.properties }}</span>
+                  <span>{{ item.notes }}</span>
+                </div>
+                <h4>{{ item.name }}</h4>
+                <p>
+                  {{ formatModifier(item.itemSpecific.attackMod || 0) }} to hit
+                  · {{ item.itemSpecific.damage }} {{
+                  formatModifier(item.itemSpecific.damageMod || 0) }} {{
+                  item.itemSpecific.damageType }} damage
+                </p>
+                <div class="nv-card-actions">
+                  <button type="button" (click)="rollWeaponAttack(item)">
+                    Roll attack
+                    <strong
+                      >{{ formatModifier(item.itemSpecific.attackMod || 0)
+                      }}</strong
+                    >
+                  </button>
+                  <button type="button" (click)="rollWeaponDamage(item)">
+                    Roll damage
+                    <strong
+                      >{{ diceNotation(item.itemSpecific.damage || '1d4',
+                      item.itemSpecific.damageMod || 0) }}</strong
+                    >
+                  </button>
+                </div>
+              </article>
+              } }
+
+              <article class="nv-action-card">
+                <div class="nv-action-card__topline">
+                  <span>Melee attack</span><span>5 feet</span>
+                </div>
+                <h4>Unarmed Strike / Death Touch</h4>
+                <p>
+                  Strike for {{ 1 + character().abilityModifiers.Strength }}
+                  bludgeoning. Death Touch adds 3d10 necrotic and ignores
+                  necrotic resistance.
+                </p>
+                <div class="nv-card-actions">
+                  <button
+                    type="button"
+                    (click)="rollD20('Unarmed strike', character().abilityModifiers.Strength + character().proficiency)"
+                  >
+                    Attack
+                    <strong
+                      >{{ formatModifier(character().abilityModifiers.Strength +
+                      character().proficiency) }}</strong
+                    >
+                  </button>
+                  <button
+                    type="button"
+                    (click)="rollDamage('Death Touch damage', '3d10')"
+                  >
+                    Death Touch <strong>3d10</strong>
+                  </button>
+                </div>
+              </article>
+            </div>
+          </section>
+          } @if (actionMatches('action', 'other', 'limited')) {
+          <section class="nv-action-section">
+            <div class="nv-subheading">
+              <span>02</span>
+              <h3>Actions & Cantrips</h3>
+            </div>
+            <div class="nv-compact-actions">
+              @if (actionMatches('action', 'limited')) {
+              <details open>
+                <summary>
+                  <span>Draw Card</span><small>Action · Wild Tarot Deck</small>
+                </summary>
+                <p>
+                  Draw and reveal the top card, then resolve its effect. You
+                  have five draw actions and regain them after a short or long
+                  rest.
+                </p>
+                <div class="nv-inline-controls">
+                  <button type="button" (click)="setActiveTab('cards')">
+                    Open the deck
+                  </button>
+                  <button
+                    type="button"
+                    (click)="characterService.shareDestiny()"
+                    [disabled]="character().featureUsages.sharedDestiny >= 2"
+                  >
+                    Use Shared Destiny · {{
+                    character().featureUsages.sharedDestiny }}/2
+                  </button>
+                </div>
+              </details>
+              } @if (actionMatches('other', 'limited')) {
+              <details open>
+                <summary>
+                  <span>Charm of the Creeping Hand</span
+                  ><small>Once per turn on hit</small>
+                </summary>
+                <p>
+                  Add 1d10 necrotic damage and gain 5 temporary HP. The charm
+                  vanishes after five uses.
+                </p>
+                <div class="nv-inline-controls">
+                  <button
+                    type="button"
+                    (click)="rollDamage('Creeping Hand damage', '1d10')"
+                  >
+                    Roll 1d10
+                  </button>
+                  <button
+                    type="button"
+                    (click)="characterService.creepHand()"
+                    [disabled]="character().featureUsages.creepingHand >= 5"
+                  >
+                    Use · {{ character().featureUsages.creepingHand }}/5
+                  </button>
+                </div>
+              </details>
+              } @if (actionMatches('action', 'limited')) {
+              <details open>
+                <summary>
+                  <span>Vecna's Link</span
+                  ><small>Action · See Invisibility · 1 hour</small>
+                </summary>
+                <p>
+                  Cast See Invisibility without a spell slot or components.
+                  Until it ends, see invisible creatures and objects as though
+                  visible and see into the Ethereal Plane.
+                </p>
+                <button
+                  type="button"
+                  (click)="characterService.useVecnaLink()"
+                  [disabled]="character().featureUsages.vecnasLink >= 1"
+                >
+                  Use · {{ character().featureUsages.vecnasLink }}/1
+                </button>
+              </details>
+              }
+            </div>
+          </section>
+          } @if (actionMatches('bonus', 'reaction', 'other', 'limited')) {
+          <section class="nv-action-section nv-action-section--split">
+            @if (actionMatches('bonus', 'other', 'limited')) {
+            <div>
+              <div class="nv-subheading">
+                <span>BA</span>
+                <h3>Bonus Actions</h3>
+              </div>
+              @if (actionMatches('bonus', 'limited')) {
+              <article class="nv-rule-card">
+                <h4>Convergent Return</h4>
+                <p>Spend a use to reshuffle one expended card into the deck.</p>
+                <button
+                  type="button"
+                  (click)="characterService.convergentReturn()"
+                  [disabled]="character().featureUsages.convergentReturn >= 2"
+                >
+                  Use · {{ character().featureUsages.convergentReturn }}/2
+                </button>
+              </article>
+              } @if (actionMatches('bonus', 'other')) {
+              <article class="nv-rule-card">
+                <h4>Two-Weapon Fighting</h4>
+                <p>
+                  After attacking with a light melee weapon, attack with another
+                  light weapon. Do not add a positive ability modifier to the
+                  bonus attack's damage.
+                </p>
+              </article>
+              }
+            </div>
+            } @if (actionMatches('reaction')) {
+            <div>
+              <div class="nv-subheading">
+                <span>R</span>
+                <h3>Reactions</h3>
+              </div>
+              <article class="nv-rule-card">
+                <h4>Altered Outcome</h4>
+                <p>
+                  Discard the top card to reroll your attack, check, or save
+                  after learning whether it succeeded. Keep the second result.
+                </p>
+              </article>
+            </div>
+            }
+          </section>
+          } } @case ('spells') {
+          <div class="nv-tab-utility">
+            <div class="nv-spell-stats" aria-label="Spellcasting statistics">
+              <div>
+                <span>Spell Save DC</span>
+                <strong>{{ character().spellSaveDC }}</strong>
+              </div>
+              <button type="button" (click)="rollSpellAttack('Spell attack')">
+                <span>Spell Attack</span>
+                <strong
+                  >{{ formatModifier(character().spellAttackModifier) }}</strong
+                >
+              </button>
+            </div>
+          </div>
+
+          <section class="nv-spell-list" aria-label="Known spells">
+            <article class="nv-spell-row">
+              <div class="nv-spell-row__heading">
+                <div>
+                  <small>Cantrip · Evocation</small>
+                  <h3>Shocking Grasp</h3>
+                </div>
+                <span>Touch · Instantaneous</span>
+              </div>
+              <p>
+                On hit: 2d8 lightning and the target cannot take reactions until
+                its next turn. Advantage against metal armor.
+              </p>
+              <div class="nv-inline-controls">
+                <button
+                  type="button"
+                  (click)="rollSpellAttack('Shocking Grasp attack')"
+                >
+                  Attack
+                  <strong
+                    >{{ formatModifier(character().spellAttackModifier)
+                    }}</strong
+                  >
+                </button>
+                <button
+                  type="button"
+                  (click)="rollDamage('Shocking Grasp damage', '2d8')"
+                >
+                  Damage <strong>2d8</strong>
+                </button>
+              </div>
+            </article>
+
+            <article class="nv-spell-row">
+              <div class="nv-spell-row__heading">
+                <div>
+                  <small>Cantrip · Evocation</small>
+                  <h3>Ray of Frost</h3>
+                </div>
+                <span>60 ft. · Instantaneous</span>
+              </div>
+              <p>
+                On hit: 2d8 cold and reduce the target's speed by 10 ft. until
+                your next turn.
+              </p>
+              <div class="nv-inline-controls">
+                <button
+                  type="button"
+                  (click)="rollSpellAttack('Ray of Frost attack')"
+                >
+                  Attack
+                  <strong
+                    >{{ formatModifier(character().spellAttackModifier)
+                    }}</strong
+                  >
+                </button>
+                <button
+                  type="button"
+                  (click)="rollDamage('Ray of Frost damage', '2d8')"
+                >
+                  Damage <strong>2d8</strong>
+                </button>
+              </div>
+            </article>
+
+            <article class="nv-spell-row">
+              <div class="nv-spell-row__heading">
+                <div>
+                  <small>Cantrip · Transmutation</small>
+                  <h3>Thaumaturgy</h3>
+                </div>
+                <span>30 ft. · Up to 1 minute</span>
+              </div>
+              <p>
+                Create one minor wonder: amplify your voice, alter flames or
+                your eyes, cause harmless tremors or sounds, or open or slam an
+                unlocked door or window. Maintain up to three effects.
+              </p>
+            </article>
+
+            <article class="nv-spell-row">
+              <div class="nv-spell-row__heading">
+                <div>
+                  <small>Cantrip · Abjuration</small>
+                  <h3>Resistance</h3>
+                </div>
+                <span>Touch · Concentration</span>
+              </div>
+              <p>
+                A willing creature may add 1d4 to one saving throw before the
+                spell ends.
+              </p>
+              <div class="nv-inline-controls">
+                <button
+                  type="button"
+                  (click)="rollDamage('Resistance bonus', '1d4')"
+                >
+                  Roll bonus <strong>1d4</strong>
+                </button>
+              </div>
+            </article>
+          </section>
+          } @case ('cards') {
+          <app-new-view-cards-panel />
+          } @case ('inventory') {
+          <section class="nv-inventory-summary" aria-label="Inventory summary">
+            <div class="nv-weight-summary">
+              <span>Weight carried</span>
+              <strong>{{ carriedWeight() }} <small>lb.</small></strong>
+              <small>Unencumbered</small>
+            </div>
+            <button
+              class="nv-coin-summary"
+              type="button"
+              aria-label="Manage coin"
+              (click)="openDrawer('coin', $event.currentTarget)"
+            >
+              <span>Coins</span>
+              <strong>{{ character().wealth.gold }} <i>GP</i></strong>
+              <small
+                >{{ character().wealth.silver }} SP · {{
+                character().wealth.copper }} CP</small
+              >
+            </button>
+          </section>
+
+          <div class="nv-inventory-toolbar">
+            <label class="nv-search-field">
+              <span class="sr-only">Search inventory</span>
+              <span aria-hidden="true">⌕</span>
+              <input
+                type="search"
+                placeholder="Search item names, types, or notes"
+                [ngModel]="inventorySearch()"
+                (ngModelChange)="inventorySearch.set($event)"
+              />
+            </label>
+            <div
+              class="nv-filter-pills"
+              role="group"
+              aria-label="Inventory filter"
+            >
+              <button
+                type="button"
+                [class.is-active]="inventoryFilter() === 'all'"
+                [attr.aria-pressed]="inventoryFilter() === 'all'"
+                (click)="inventoryFilter.set('all')"
+              >
+                All
+              </button>
+              <button
+                type="button"
+                [class.is-active]="inventoryFilter() === 'equipped'"
+                [attr.aria-pressed]="inventoryFilter() === 'equipped'"
+                (click)="inventoryFilter.set('equipped')"
+              >
+                Equipment
+              </button>
+              <button
+                type="button"
+                [class.is-active]="inventoryFilter() === 'attunement'"
+                [attr.aria-pressed]="inventoryFilter() === 'attunement'"
+                (click)="inventoryFilter.set('attunement')"
+              >
+                Attunement
+              </button>
+            </div>
+          </div>
+
+          <div class="nv-inventory-table">
+            <div class="nv-inventory-table__head" aria-hidden="true">
+              <span>Active</span>
+              <span>Name</span>
+              <span>Weight</span>
+              <span>Qty</span>
+              <span>Cost (GP)</span>
+              <span>Notes</span>
+            </div>
+            @if (filteredInventory().length) { @for (group of inventoryGroups();
+            track group.id) { @if (group.items.length) {
+            <section class="nv-inventory-group">
+              <header>
+                <h3>
+                  {{ group.label }} <span>({{ group.items.length }})</span>
+                </h3>
+                <strong
+                  >{{ inventoryWeight(group.items) }} <small>lb.</small></strong
+                >
+              </header>
+              @for (item of group.items; track item.name) {
+              <article
+                class="nv-inventory-row"
+                [class.is-equipped]="item.equipped"
+                [class.is-attuned]="item.isAttuned"
+              >
+                <div class="nv-inventory-row__active">
+                  <button
+                    type="button"
+                    [class.is-active]="item.equipped"
+                    [attr.aria-label]="
+                      (item.equipped ? 'Unequip ' : 'Equip ') + item.name
+                    "
+                    [attr.title]="item.equipped ? 'Equipped' : 'Not equipped'"
+                    (click)="toggleEquipment(item)"
+                  >
+                    {{ item.equipped ? '■' : '□' }}
+                  </button>
+                  @if (item.requiresAttunement) {
+                  <button
+                    type="button"
+                    [class.is-active]="item.isAttuned"
+                    [attr.aria-label]="
+                      (item.isAttuned ? 'Unattune ' : 'Attune ') + item.name
+                    "
+                    [attr.title]="item.isAttuned ? 'Attuned' : 'Not attuned'"
+                    (click)="toggleAttunement(item)"
+                  >
+                    {{ item.isAttuned ? '✦' : '◇' }}
+                  </button>
+                  }
+                </div>
+                <div class="nv-inventory-row__name">
+                  <h4>{{ item.name }}</h4>
+                  <small
+                    >{{ item.category || 'Gear' }} @if (item.isAttuned) { ·
+                    Attuned } @else if (item.requiresAttunement) { · Requires
+                    attunement }</small
+                  >
+                </div>
+                <span class="nv-inventory-row__weight"
+                  >{{ item.weight || '—' }}</span
+                >
+                <span class="nv-inventory-row__quantity">{{ item.qty }}</span>
+                <span class="nv-inventory-row__cost"
+                  >{{ item.value || '—' }}</span
+                >
+                <details class="nv-item-notes">
+                  <summary>{{ item.notes || 'No notes' }}</summary>
+                  @if (item.notes) {
+                  <p>{{ item.notes }}</p>
+                  }
+                </details>
+              </article>
+              }
+            </section>
+            } } } @else {
+            <div class="nv-empty-state">
+              <span aria-hidden="true">◇</span>
+              <h3>No matching gear</h3>
+              <p>Try a different search or filter.</p>
+            </div>
+            }
+          </div>
+
+          <label class="nv-notes-field">
+            <span>Additional inventory notes</span>
+            <textarea
+              rows="6"
+              [ngModel]="character().additionalInventory"
+              (ngModelChange)="characterService.modAdditionalInventory($event)"
+              placeholder="Consumables, borrowed objects, and session reminders…"
+            ></textarea>
+          </label>
+          } @case ('features') {
+          <div class="nv-feature-groups">
+            @for (group of featureGroups; track group.name) {
+            <section class="nv-feature-group">
+              <header>
+                <p>{{ group.subtitle }}</p>
+                <h3>{{ group.name }}</h3>
+              </header>
+              <div class="nv-feature-grid">
+                @for (feature of group.features; track feature.name) {
+                <details class="nv-feature-card" open>
+                  <summary>
+                    <span>
+                      <small
+                        >{{ feature.source }} @if (feature.level) { · {{
+                        feature.level }} }</small
+                      >
+                      <strong>{{ feature.name }}</strong>
+                    </span>
+                    @if (feature.usage) {
+                    <span class="nv-usage-badge"
+                      >{{ featureUses(feature) }}/{{ featureMax(feature)
+                      }}</span
+                    >
+                    }
+                    <span class="nv-disclosure" aria-hidden="true">＋</span>
+                  </summary>
+                  <div class="nv-feature-card__body">
+                    <p>{{ feature.description }}</p>
+                    @for (detail of feature.details || []; track detail) {
+                    <p>{{ detail }}</p>
+                    } @if (feature.usage) {
+                    <div class="nv-feature-use">
+                      <span>Recovers: {{ feature.usage.recovery }}</span>
+                      @if (feature.usage.key === 'pastKnowledge') {
+                      <button
+                        type="button"
+                        (click)="rollKnowledgeFromPastLife()"
+                      >
+                        Roll d6
+                      </button>
+                      }
+                      <button
+                        type="button"
+                        [disabled]="featureUses(feature) >= featureMax(feature)"
+                        (click)="useFeature(feature)"
+                      >
+                        Use feature · {{ featureUses(feature) }}/{{
+                        featureMax(feature) }}
+                      </button>
+                    </div>
+                    }
+                  </div>
+                </details>
+                }
+              </div>
+            </section>
+            }
+          </div>
+          } @case ('notes') {
+          <div class="nv-notes-layout">
+            <label class="nv-notes-field nv-notes-field--large">
+              <span>Session notes</span>
+              <textarea
+                rows="18"
+                [ngModel]="character().additionalInventory"
+                (ngModelChange)="characterService.modAdditionalInventory($event)"
+                placeholder="Write anything Vasha needs for the next scene…"
+              ></textarea>
+            </label>
+            <aside class="nv-reminders">
+              <h3>Current state</h3>
+              <div>
+                <span>Active conditions</span>
+                <strong
+                  >{{ activeConditionLabels().join(', ') || 'None' }}</strong
+                >
+              </div>
+              <div>
+                <span>Required attunement</span>
+                <strong
+                  >{{ unattunedItems().length ? unattunedItems().length + '
+                  item(s) waiting' : 'All resolved' }}</strong
+                >
+              </div>
+              <div>
+                <span>Hit dice</span>
+                <strong
+                  >{{ character().currentHitDie }} / {{ character().totalLevel
+                  }} {{ character().hitDieType }}</strong
+                >
+              </div>
+              <div>
+                <span>Death saves</span>
+                <strong
+                  >{{ character().deathPasses }} successes · {{
+                  character().deathFails }} failures</strong
+                >
+              </div>
+              <button
+                type="button"
+                (click)="openDrawer('conditions', $event.currentTarget)"
+              >
+                Manage conditions
+              </button>
+            </aside>
+          </div>
+          } }
+        </div>
+      </section>
+    </section>
+  </div>
+
+  <button
+    class="nv-dice-launcher"
+    type="button"
+    [attr.aria-expanded]="diceTrayOpen()"
+    aria-controls="local-dice-tray"
+    (click)="diceTrayOpen.set(!diceTrayOpen())"
+  >
+    <span class="nv-d20" aria-hidden="true">20</span>
+    <span>Local dice</span>
+    @if (dice.recentHistory()[0]; as latest) {
+    <strong>{{ latest.total }}</strong>
+    }
+  </button>
+
+  @if (diceTrayOpen()) {
+  <section
+    id="local-dice-tray"
+    class="nv-dice-tray"
+    aria-label="Local dice roller"
+  >
+    <header>
+      <div>
+        <small>At this table</small>
+        <h2>Local Dice</h2>
+      </div>
+      <button
+        type="button"
+        aria-label="Close dice tray"
+        (click)="diceTrayOpen.set(false)"
+      >
+        ×
+      </button>
+    </header>
+    <div class="nv-roll-modes" role="group" aria-label="D20 roll mode">
+      <button
+        type="button"
+        [class.is-active]="rollMode() === 'normal'"
+        [attr.aria-pressed]="rollMode() === 'normal'"
+        (click)="rollMode.set('normal')"
+      >
+        Normal
+      </button>
+      <button
+        type="button"
+        [class.is-active]="rollMode() === 'advantage'"
+        [attr.aria-pressed]="rollMode() === 'advantage'"
+        (click)="rollMode.set('advantage')"
+      >
+        Advantage
+      </button>
+      <button
+        type="button"
+        [class.is-active]="rollMode() === 'disadvantage'"
+        [attr.aria-pressed]="rollMode() === 'disadvantage'"
+        (click)="rollMode.set('disadvantage')"
+      >
+        Disadvantage
+      </button>
+    </div>
+    @if (dice.recentHistory()[0]; as latest) {
+    <article class="nv-latest-roll" aria-live="polite">
+      <div>
+        <span>{{ latest.label }}</span
+        ><small>{{ latest.notation }} · {{ latest.mode }}</small>
+      </div>
+      <strong>{{ latest.total }}</strong>
+      <p>
+        Dice: {{ latest.allDice.join(', ') }} @if (latest.modifier) { · modifier
+        {{ formatModifier(latest.modifier) }} }
+      </p>
+    </article>
+    } @else {
+    <div class="nv-no-rolls">
+      <span aria-hidden="true">◇</span>
+      <p>Tap any outlined statistic to make the first roll.</p>
+    </div>
+    } @if (dice.recentHistory().length > 1) {
+    <div class="nv-roll-history">
+      <div class="nv-roll-history__heading">
+        <h3>Recent</h3>
+        <button type="button" (click)="dice.clearHistory()">Clear</button>
+      </div>
+      @for (roll of dice.recentHistory().slice(1); track roll.id) {
+      <div>
+        <span>{{ roll.label }}<small>{{ roll.notation }}</small></span
+        ><strong>{{ roll.total }}</strong>
+      </div>
+      }
+    </div>
+    }
+  </section>
+  } @if (activeDrawer(); as drawer) {
+  <button
+    class="nv-drawer-backdrop"
+    type="button"
+    aria-label="Close management drawer"
+    (click)="closeDrawer()"
+  ></button>
+  <aside
+    class="nv-drawer"
+    [attr.data-drawer]="drawer"
+    cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="nv-drawer-title"
+  >
+    <header class="nv-drawer-header">
+      <div>
+        <small>Vasha Taltos</small>
+        <h2 id="nv-drawer-title">
+          @switch (drawer) { @case ('hp') { Hit Point Management } @case
+          ('rest') { Rest & Recovery } @case ('conditions') { Conditions } @case
+          ('settings') { Sheet Settings } @case ('coin') { Manage Coin } }
+        </h2>
+      </div>
+      <button type="button" aria-label="Close drawer" (click)="closeDrawer()">
+        ×
+      </button>
+    </header>
+
+    <div class="nv-drawer-body">
+      @switch (drawer) { @case ('hp') {
+      <section class="nv-hp-display">
+        <div>
+          <span>Current</span><strong>{{ character().currentHp }}</strong>
+        </div>
+        <i aria-hidden="true">/</i>
+        <div>
+          <span>Maximum</span><strong>{{ character().totalMaxHP }}</strong>
+        </div>
+        <div class="is-temp">
+          <span>Temporary</span><strong>{{ character().tempHp }}</strong>
+        </div>
+      </section>
+
+      <section class="nv-drawer-section">
+        <h3>Apply healing or damage</h3>
+        <label class="nv-number-field">
+          <span>Amount</span>
+          <input
+            data-testid="hp-amount"
+            type="number"
+            min="0"
+            inputmode="numeric"
+            [(ngModel)]="hpAmount"
+          />
+        </label>
+        <div class="nv-hp-previews">
+          <button type="button" class="is-healing" (click)="applyHealing()">
+            <small>Healing</small><strong>+ {{ hpAmount || 0 }}</strong
+            ><span>New HP {{ hpPreview('heal') }}</span>
+          </button>
+          <button
+            data-testid="apply-damage"
+            type="button"
+            class="is-damage"
+            (click)="applyDamage()"
+          >
+            <small>Damage</small><strong>− {{ hpAmount || 0 }}</strong
+            ><span>New HP {{ hpPreview('damage') }}</span>
+          </button>
+        </div>
+        <p class="nv-help-text">
+          Damage consumes temporary HP before current HP.
+        </p>
+      </section>
+
+      <section class="nv-drawer-section nv-two-field-grid">
+        <label class="nv-number-field">
+          <span>Temporary HP</span>
+          <input
+            type="number"
+            min="0"
+            inputmode="numeric"
+            [(ngModel)]="tempHpDraft"
+          />
+          <button type="button" (click)="applyTempHp()">Apply</button>
+        </label>
+        <label class="nv-number-field">
+          <span>Max HP modifier</span>
+          <input
+            type="number"
+            inputmode="numeric"
+            [(ngModel)]="maxHpModifierDraft"
+          />
+          <button type="button" (click)="applyMaxHpModifier()">Apply</button>
+        </label>
+      </section>
+
+      <section class="nv-drawer-section">
+        <div class="nv-section-title-row">
+          <h3>Death saving throws</h3>
+          <button type="button" (click)="rollDeathSave()">Roll save</button>
+        </div>
+        <div class="nv-death-saves">
+          <div>
+            <span>Successes</span>
+            <div>
+              @for (_ of [0, 1, 2]; track $index) {
+              <i [class.is-filled]="$index < character().deathPasses"></i> }
+            </div>
+            <button
+              type="button"
+              aria-label="Add one death save success"
+              [disabled]="character().deathPasses >= 3"
+              (click)="characterService.passDeathSave()"
+            >
+              ＋
+            </button>
+          </div>
+          <div>
+            <span>Failures</span>
+            <div>
+              @for (_ of [0, 1, 2]; track $index) {
+              <i
+                class="is-fail"
+                [class.is-filled]="$index < character().deathFails"
+              ></i>
+              }
+            </div>
+            <button
+              type="button"
+              aria-label="Add one death save failure"
+              [disabled]="character().deathFails >= 3"
+              (click)="characterService.failDeathSave()"
+            >
+              ＋
+            </button>
+          </div>
+        </div>
+        <button
+          class="nv-text-button"
+          type="button"
+          (click)="characterService.resetDeathSaves()"
+        >
+          Reset death saves
+        </button>
+      </section>
+      } @case ('rest') {
+      <section class="nv-rest-hero">
+        <span aria-hidden="true">☾</span>
+        <div>
+          <h3>Deathless rest</h3>
+          <p>
+            Vasha can complete a long rest in four conscious, motionless hours.
+          </p>
+        </div>
+      </section>
+
+      <section class="nv-drawer-section">
+        <h3>Hit dice</h3>
+        <div class="nv-hit-dice">
+          <button
+            type="button"
+            aria-label="Remove one hit die"
+            [disabled]="(character().currentHitDie || 0) <= 0"
+            (click)="changeHitDice(-1)"
+          >
+            −
+          </button>
+          <div>
+            <strong>{{ character().currentHitDie }}</strong
+            ><span
+              >/ {{ character().totalLevel }} {{ character().hitDieType }}</span
+            >
+          </div>
+          <button
+            type="button"
+            aria-label="Restore one hit die"
+            [disabled]="(character().currentHitDie || 0) >= character().totalLevel"
+            (click)="changeHitDice(1)"
+          >
+            ＋
+          </button>
+        </div>
+        <button
+          class="nv-primary-button"
+          type="button"
+          [disabled]="(character().currentHitDie || 0) <= 0"
+          (click)="spendHitDie()"
+        >
+          Roll & spend one hit die
+        </button>
+      </section>
+
+      <section class="nv-rest-options">
+        <article>
+          <div>
+            <small>At least 1 hour</small>
+            <h3>Short Rest</h3>
+          </div>
+          <p>
+            Recovers Scrying, Convergent Return, and Shared Destiny. Spend hit
+            dice separately above.
+          </p>
+          <ul>
+            <li>Scrying</li>
+            <li>Convergent Return</li>
+            <li>Shared Destiny</li>
+          </ul>
+          <button type="button" (click)="requestRest('short')">
+            Take short rest
+          </button>
+        </article>
+        <article>
+          <div>
+            <small>4 motionless hours</small>
+            <h3>Long Rest</h3>
+          </div>
+          <p>
+            Restores HP, half your total hit dice, every short-rest feature, and
+            long-rest resources.
+          </p>
+          <ul>
+            <li>All hit points</li>
+            <li>Knowledge from a Past Life</li>
+            <li>Detect Thoughts</li>
+            <li>Vecna's Link</li>
+          </ul>
+          <button type="button" (click)="requestRest('long')">
+            Take long rest
+          </button>
+        </article>
+      </section>
+
+      @if (restConfirmation(); as rest) {
+      <section class="nv-confirm-panel" aria-live="polite">
+        <div>
+          <strong>Confirm {{ rest }} rest?</strong>
+          <p>This immediately restores the resources listed above.</p>
+        </div>
+        <button type="button" (click)="restConfirmation.set(null)">
+          Cancel
+        </button>
+        <button type="button" class="is-confirm" (click)="applyRest()">
+          Confirm rest
+        </button>
+      </section>
+      } } @case ('conditions') {
+      <section class="nv-defense-ledger">
+        <div>
+          <small>Resistances</small
+          ><strong>{{ resistanceLabels().join(', ') || 'None' }}</strong>
+        </div>
+        <div>
+          <small>Immunities</small
+          ><strong>{{ immunityLabels().join(', ') || 'None' }}</strong>
+        </div>
+        <div>
+          <small>Advantages</small
+          ><strong>{{ advantageLabels().join(', ') || 'None' }}</strong>
+        </div>
+      </section>
+
+      <section class="nv-condition-list" aria-label="Condition toggles">
+        @for (condition of conditions; track condition.key) {
+        <button
+          type="button"
+          [class.is-active]="character().conditions[condition.key]"
+          [disabled]="conditionIsDisabled(condition.key)"
+          [attr.aria-pressed]="!!character().conditions[condition.key]"
+          (click)="toggleCondition(condition)"
+        >
+          <span class="nv-condition-icon" aria-hidden="true"
+            >{{ condition.icon }}</span
+          >
+          <span
+            ><strong>{{ condition.label }}</strong>@if
+            (conditionIsDisabled(condition.key)) { <small>Immune</small> }</span
+          >
+          <i aria-hidden="true"></i>
+        </button>
+        }
+      </section>
+
+      <section class="nv-drawer-section">
+        <h3>Exhaustion</h3>
+        <p class="nv-help-text">Track levels from 0 to 6.</p>
+        <div class="nv-exhaustion-control">
+          <button
+            type="button"
+            aria-label="Reduce exhaustion"
+            [disabled]="(character().conditions.exhaustion || 0) <= 0"
+            (click)="changeExhaustion(-1)"
+          >
+            −
+          </button>
+          <strong>{{ character().conditions.exhaustion || 0 }}</strong>
+          <button
+            type="button"
+            aria-label="Increase exhaustion"
+            [disabled]="(character().conditions.exhaustion || 0) >= 6"
+            (click)="changeExhaustion(1)"
+          >
+            ＋
+          </button>
+        </div>
+      </section>
+      } @case ('coin') {
+      <section class="nv-coin-ledger" aria-labelledby="nv-coin-ledger-title">
+        <h3 id="nv-coin-ledger-title">My Coin</h3>
+        <div class="nv-coin-total">
+          <strong>Total (in gp)</strong>
+          <span>{{ coinValueInGold() | number: '1.0-2' }} GP</span>
+        </div>
+        <div class="nv-coin-ledger__row">
+          <span class="nv-currency-mark is-gold" aria-hidden="true">◆</span>
+          <div><strong>Gold (gp)</strong><small>Primary currency</small></div>
+          <b>{{ character().wealth.gold }}</b>
+        </div>
+        <div class="nv-coin-ledger__row">
+          <span class="nv-currency-mark is-silver" aria-hidden="true">◆</span>
+          <div><strong>Silver (sp)</strong><small>10 sp = 1 gp</small></div>
+          <b>{{ character().wealth.silver }}</b>
+        </div>
+        <div class="nv-coin-ledger__row">
+          <span class="nv-currency-mark is-copper" aria-hidden="true">◆</span>
+          <div><strong>Copper (cp)</strong><small>100 cp = 1 gp</small></div>
+          <b>{{ character().wealth.copper }}</b>
+        </div>
+      </section>
+
+      <section class="nv-drawer-section nv-coin-adjustment">
+        <h3>Adjust Coin</h3>
+        <div class="nv-coin-inputs">
+          <label>
+            <span><i class="nv-currency-mark is-gold">◆</i> GP</span>
+            <input
+              type="number"
+              min="0"
+              inputmode="numeric"
+              [(ngModel)]="coinDraft.gold"
+            />
+          </label>
+          <label>
+            <span><i class="nv-currency-mark is-silver">◆</i> SP</span>
+            <input
+              type="number"
+              min="0"
+              inputmode="numeric"
+              [(ngModel)]="coinDraft.silver"
+            />
+          </label>
+          <label>
+            <span><i class="nv-currency-mark is-copper">◆</i> CP</span>
+            <input
+              type="number"
+              min="0"
+              inputmode="numeric"
+              [(ngModel)]="coinDraft.copper"
+            />
+          </label>
+        </div>
+        <div class="nv-coin-actions">
+          <button type="button" class="is-add" (click)="applyCoinDraft(1)">
+            ＋ Add
+          </button>
+          <button type="button" class="is-remove" (click)="applyCoinDraft(-1)">
+            − Remove
+          </button>
+          <button type="button" (click)="clearCoinDraft()">× Clear</button>
+        </div>
+      </section>
+      } @case ('settings') {
+      <section class="nv-settings-intro">
+        <span aria-hidden="true">✦</span>
+        <a routerLink="/modify-character">Modify character</a>
+        <a routerLink="/stats">Open the classic sheet</a>
+      </section>
+      <section class="nv-drawer-section nv-danger-zone">
+        <small>Destructive action</small>
+        <h3>Reset character state</h3>
+        @if (resetConfirmation()) {
+        <div class="nv-reset-confirm">
+          <strong>This cannot be undone.</strong
+          ><button type="button" (click)="resetConfirmation.set(false)">
+            Cancel</button
+          ><button type="button" class="is-danger" (click)="resetCharacter()">
+            Yes, reset Vasha
+          </button>
+        </div>
+        } @else {
+        <button type="button" class="is-danger" (click)="resetCharacter()">
+          Reset character…
+        </button>
+        }
+      </section>
+      } }
+    </div>
+  </aside>
+  }
+</main>
