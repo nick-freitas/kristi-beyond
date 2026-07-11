@@ -1,0 +1,1046 @@
+<main class="builder-shell">
+  <div class="builder-app" [attr.inert]="inventoryRemoval() ? '' : null">
+    <section class="builder-hero" aria-labelledby="builder-title">
+      <div class="builder-hero__identity">
+        <img src="/assets/propic.png" alt="Portrait of Vasha Taltos" />
+        <div>
+          <h1 id="builder-title">Character Builder</h1>
+          <p>{{ character().name }} · Level {{ character().totalLevel }}</p>
+        </div>
+      </div>
+      <div class="builder-hero__actions">
+        <a routerLink="/new-view">Play sheet</a>
+        <a class="is-secondary" routerLink="/stats">Classic sheet</a>
+      </div>
+    </section>
+
+    <nav
+      class="builder-tabs"
+      role="tablist"
+      aria-label="Character builder sections"
+    >
+      @for (step of steps; track step.id; let index = $index) {
+      <button
+        type="button"
+        role="tab"
+        [id]="'builder-tab-' + step.id"
+        [attr.aria-selected]="activeStep() === step.id"
+        [attr.aria-controls]="
+        activeStep() === step.id ? 'builder-active-panel' : null
+      "
+        [attr.tabindex]="activeStep() === step.id ? 0 : -1"
+        [class.is-active]="activeStep() === step.id"
+        [class.is-complete]="index < completedStepCount()"
+        (click)="setStep(step.id)"
+        (keydown)="onTabKeydown($event, step.id)"
+      >
+        <span>{{ index + 1 }}</span>{{ step.label }}
+      </button>
+      }
+    </nav>
+
+    <div class="builder-stage">
+      <section class="builder-paper">
+        <div class="builder-identity-editor">
+          <button
+            type="button"
+            class="builder-arrow"
+            aria-label="Previous builder section"
+            [disabled]="!previousStep()"
+            (click)="goPrevious()"
+          >
+            ‹
+          </button>
+          <img src="/assets/propic.png" alt="" />
+          <label class="builder-field builder-field--identity">
+            <span>Character name</span>
+            <input
+              type="text"
+              aria-label="Character name"
+              [ngModel]="character().name"
+              (change)="
+              characterService.updateIdentity({ name: $any($event.target).value })
+            "
+            />
+          </label>
+          <button
+            type="button"
+            class="builder-arrow"
+            aria-label="Next builder section"
+            [disabled]="!nextStep()"
+            (click)="goNext()"
+          >
+            ›
+          </button>
+        </div>
+
+        <article
+          class="builder-page"
+          role="tabpanel"
+          id="builder-active-panel"
+          tabindex="-1"
+          [attr.aria-labelledby]="'builder-tab-' + activeStep()"
+        >
+          @switch (activeStep()) { @case ('home') {
+          <div class="builder-section-grid builder-section-grid--home">
+            <section
+              class="builder-card builder-card--primary builder-card--compact"
+            >
+              <label class="builder-field">
+                <span>Alignment</span>
+                <select
+                  aria-label="Alignment"
+                  [ngModel]="character().alignment"
+                  (ngModelChange)="characterService.updateIdentity({ alignment: $event })"
+                >
+                  @for (alignment of alignmentOptions; track alignment.value) {
+                  <option [value]="alignment.value">
+                    {{ alignment.label }}
+                  </option>
+                  }
+                </select>
+              </label>
+            </section>
+
+            <section class="builder-card">
+              <h3 class="builder-subheading">Current character</h3>
+              <dl class="builder-fact-list">
+                <div>
+                  <dt>Class</dt>
+                  <dd>
+                    {{ character().classes[0].class }} {{ character().totalLevel
+                    }}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Subclass</dt>
+                  <dd>{{ character().classes[0].subclass }}</dd>
+                </div>
+                <div>
+                  <dt>Species</dt>
+                  <dd>{{ character().race }}</dd>
+                </div>
+                <div>
+                  <dt>Background</dt>
+                  <dd>{{ character().background }}</dd>
+                </div>
+                <div>
+                  <dt>Hit points</dt>
+                  <dd>{{ character().totalMaxHP }}</dd>
+                </div>
+                <div>
+                  <dt>Armor class</dt>
+                  <dd>{{ character().ac }}</dd>
+                </div>
+                <div>
+                  <dt>Proficiency</dt>
+                  <dd>{{ formatModifier(character().proficiency) }}</dd>
+                </div>
+                <div>
+                  <dt>Walking</dt>
+                  <dd>{{ character().speeds.land }}</dd>
+                </div>
+              </dl>
+            </section>
+          </div>
+
+          <section class="builder-currency-panel" aria-label="Coin totals">
+            <div class="builder-currency-grid">
+              <label class="builder-field is-gold">
+                <span>Gold · GP</span>
+                <input
+                  type="number"
+                  min="0"
+                  inputmode="numeric"
+                  [ngModel]="character().wealth.gold"
+                  (change)="
+                  characterService.setWealth({
+                    gold: numberValue($any($event.target).value),
+                  })
+                "
+                />
+              </label>
+              <label class="builder-field is-silver">
+                <span>Silver · SP</span>
+                <input
+                  type="number"
+                  min="0"
+                  inputmode="numeric"
+                  [ngModel]="character().wealth.silver"
+                  (change)="
+                  characterService.setWealth({
+                    silver: numberValue($any($event.target).value),
+                  })
+                "
+                />
+              </label>
+              <label class="builder-field is-copper">
+                <span>Copper · CP</span>
+                <input
+                  type="number"
+                  min="0"
+                  inputmode="numeric"
+                  [ngModel]="character().wealth.copper"
+                  (change)="
+                  characterService.setWealth({
+                    copper: numberValue($any($event.target).value),
+                  })
+                "
+                />
+              </label>
+            </div>
+          </section>
+          } @case ('class') {
+          <section class="builder-class-banner">
+            <div class="builder-class-icon" aria-hidden="true">✦</div>
+            <div>
+              <h3>{{ character().classes[0].class }}</h3>
+              <p>{{ character().classes[0].subclass }}</p>
+            </div>
+            <dl>
+              <div class="builder-level-control">
+                <dt>Level</dt>
+                <dd>
+                  <select
+                    aria-label="Character level"
+                    [ngModel]="character().classes[0].level"
+                    (ngModelChange)="characterService.updatePrimaryClass({ level: numberValue($event, 1) })"
+                  >
+                    @for (level of levelOptions; track level) {
+                    <option [ngValue]="level">{{ level }}</option>
+                    }
+                  </select>
+                </dd>
+              </div>
+              <div>
+                <dt>Max HP</dt>
+                <dd>{{ character().totalMaxHP }}</dd>
+              </div>
+              <div>
+                <dt>Hit die</dt>
+                <dd>d{{ character().classes[0].hitDie }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <details class="builder-disclosure" open>
+            <summary>
+              <span><b>Hit points</b></span>
+              <i aria-hidden="true"></i>
+            </summary>
+            <div class="builder-disclosure__body">
+              <div class="builder-hp-settings">
+                <label class="builder-field">
+                  <span>Max HP modifier</span>
+                  <input
+                    type="number"
+                    [ngModel]="character().maxHpModifier"
+                    (change)="
+                    characterService.updateHpSettings({
+                      maxHpModifier: numberValue($any($event.target).value),
+                    })
+                  "
+                  />
+                </label>
+                <label class="builder-field">
+                  <span>Override max HP</span>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="Calculated"
+                    [ngModel]="character().maxHpOverride || null"
+                    (change)="
+                    characterService.updateHpSettings({
+                      maxHpOverride:
+                        optionalNumber($any($event.target).value) ?? 0,
+                    })
+                  "
+                  />
+                </label>
+                <div class="builder-derived-box">
+                  <small>Calculated maximum</small>
+                  <strong>{{ character().totalMaxHP }}</strong>
+                  <span
+                    >{{ character().totalInitialHP }} base {{
+                    formatModifier(character().maxHpModifier) }} modifier</span
+                  >
+                </div>
+              </div>
+              <div class="builder-hp-rolls">
+                @for (roll of character().rolledHP; track $index) {
+                <label>
+                  <span>Level {{ $index + 1 }}</span>
+                  <input
+                    type="number"
+                    min="1"
+                    [max]="character().classes[0].hitDie"
+                    [ngModel]="roll"
+                    (change)="
+                    characterService.updateRolledHp(
+                      $index,
+                      numberValue($any($event.target).value, 1)
+                    )
+                  "
+                  />
+                </label>
+                }
+              </div>
+            </div>
+          </details>
+
+          <details class="builder-disclosure" open>
+            <summary>
+              <span><b>Proficiencies</b></span>
+              <i aria-hidden="true"></i>
+            </summary>
+            <div class="builder-disclosure__body">
+              <h4 class="builder-subheading">Saving throw proficiencies</h4>
+              <div class="builder-toggle-grid">
+                @for (ability of abilities; track ability.key) {
+                <label class="builder-check">
+                  <input
+                    type="checkbox"
+                    [checked]="!!character().saveProficiencies[ability.key]"
+                    (change)="updateSave(ability.key, checked($event))"
+                  />
+                  <span><b>{{ ability.short }}</b>{{ ability.label }}</span>
+                </label>
+                }
+              </div>
+              <div class="builder-two-columns builder-proficiency-columns">
+                <section>
+                  <h4 class="builder-subheading">Armor training</h4>
+                  <div class="builder-add-row">
+                    <input
+                      aria-label="Add armor proficiency"
+                      [(ngModel)]="newArmourProficiency"
+                      (keydown.enter)="addArmourProficiency()"
+                    />
+                    <button type="button" (click)="addArmourProficiency()">
+                      Add
+                    </button>
+                  </div>
+                  <div class="builder-chip-list">
+                    @for (item of character().armourProficiencies; track item) {
+                    <span
+                      >{{ item }}<button
+                        type="button"
+                        [attr.aria-label]="'Remove ' + item"
+                        (click)="removeArmourProficiency(item)"
+                      >
+                        ×
+                      </button></span
+                    >
+                    }
+                  </div>
+                </section>
+                <section>
+                  <h4 class="builder-subheading">Weapon training</h4>
+                  <div class="builder-add-row">
+                    <input
+                      aria-label="Add weapon proficiency"
+                      [(ngModel)]="newWeaponProficiency"
+                      (keydown.enter)="addWeaponProficiency()"
+                    />
+                    <button type="button" (click)="addWeaponProficiency()">
+                      Add
+                    </button>
+                  </div>
+                  <div class="builder-chip-list">
+                    @for (item of character().weaponProficiencies; track item) {
+                    <span
+                      >{{ item }}<button
+                        type="button"
+                        [attr.aria-label]="'Remove ' + item"
+                        (click)="removeWeaponProficiency(item)"
+                      >
+                        ×
+                      </button></span
+                    >
+                    }
+                  </div>
+                </section>
+              </div>
+            </div>
+          </details>
+          } @case ('background') {
+          <section class="builder-origin-intro builder-choice-banner">
+            <label class="builder-field builder-field--medium">
+              <span>Background</span>
+              <select
+                aria-label="Background"
+                [ngModel]="character().background"
+                (ngModelChange)="characterService.updateIdentity({ background: $event })"
+              >
+                @for (background of backgroundOptions; track background) {
+                <option [value]="background">{{ background }}</option>
+                }
+              </select>
+            </label>
+          </section>
+
+          <div class="builder-two-columns builder-origin-columns">
+            <section class="builder-card">
+              <h3 class="builder-subheading">Languages</h3>
+              <div class="builder-add-row">
+                <input
+                  aria-label="Add language"
+                  placeholder="Add a language"
+                  [(ngModel)]="newLanguage"
+                  (keydown.enter)="addLanguage()"
+                />
+                <button type="button" (click)="addLanguage()">Add</button>
+              </div>
+              <div class="builder-chip-list builder-chip-list--large">
+                @for (language of character().languages; track language) {
+                <span
+                  >{{ language }}<button
+                    type="button"
+                    [attr.aria-label]="'Remove ' + language"
+                    (click)="removeLanguage(language)"
+                  >
+                    ×
+                  </button></span
+                >
+                } @empty {
+                <p class="builder-empty-inline">No languages recorded.</p>
+                }
+              </div>
+            </section>
+            <section class="builder-card">
+              <h3 class="builder-subheading">Tools</h3>
+              <div class="builder-add-row">
+                <input
+                  aria-label="Add tool"
+                  placeholder="Add a tool"
+                  [(ngModel)]="newTool"
+                  (keydown.enter)="addTool()"
+                />
+                <button type="button" (click)="addTool()">Add</button>
+              </div>
+              <div class="builder-chip-list builder-chip-list--large">
+                @for (tool of character().tools; track tool) {
+                <span
+                  >{{ tool }}<button
+                    type="button"
+                    [attr.aria-label]="'Remove ' + tool"
+                    (click)="removeTool(tool)"
+                  >
+                    ×
+                  </button></span
+                >
+                } @empty {
+                <p class="builder-empty-inline">No tools recorded.</p>
+                }
+              </div>
+            </section>
+          </div>
+
+          <details class="builder-disclosure" open>
+            <summary>
+              <span><b>Stored skill proficiencies</b></span>
+              <i aria-hidden="true"></i>
+            </summary>
+            <div class="builder-disclosure__body">
+              <div class="builder-skill-toggle-grid">
+                @for (skill of skills; track skill.key) {
+                <label class="builder-check builder-check--skill">
+                  <input
+                    type="checkbox"
+                    [checked]="!!character().skillProficiencies[skill.key]"
+                    (change)="updateSkill(skill.key, checked($event))"
+                  />
+                  <span><b>{{ skill.ability }}</b>{{ skill.label }}</span>
+                </label>
+                }
+              </div>
+            </div>
+          </details>
+          } @case ('species') {
+          <section class="builder-species-banner builder-choice-banner">
+            <div class="builder-lineage-mark" aria-hidden="true">✧</div>
+            <label class="builder-field">
+              <span>Species</span>
+              <select
+                aria-label="Species"
+                [ngModel]="character().race"
+                (ngModelChange)="selectSpecies($event)"
+              >
+                @for (species of speciesProfiles; track species.race) {
+                <option [value]="species.race">{{ species.race }}</option>
+                }
+              </select>
+            </label>
+          </section>
+
+          <details class="builder-disclosure" open>
+            <summary>
+              <span><b>Movement</b></span
+              ><i aria-hidden="true"></i>
+            </summary>
+            <div class="builder-disclosure__body">
+              <div class="builder-speed-grid">
+                @for (speed of speedDefinitions; track speed.key) {
+                <div class="builder-readonly-stat">
+                  <span>{{ speed.label }}</span>
+                  <strong>{{ character().speeds[speed.key] ?? '—' }}</strong>
+                </div>
+                }
+              </div>
+            </div>
+          </details>
+
+          <details class="builder-disclosure" open>
+            <summary>
+              <span><b>Racial ability adjustments</b></span
+              ><i aria-hidden="true"></i>
+            </summary>
+            <div class="builder-disclosure__body">
+              <div class="builder-racial-grid">
+                @for (ability of abilities; track ability.key) {
+                <div class="builder-readonly-stat">
+                  <span>{{ ability.short }}</span>
+                  <strong
+                    >{{ character().racialAsis[ability.key] === undefined ? '—'
+                    : formatModifier(character().racialAsis[ability.key] || 0)
+                    }}</strong
+                  >
+                </div>
+                }
+              </div>
+            </div>
+          </details>
+
+          <details class="builder-disclosure" open>
+            <summary>
+              <span><b>Lineage defenses</b></span
+              ><i aria-hidden="true"></i>
+            </summary>
+            <div class="builder-disclosure__body">
+              <div class="builder-trait-grid">
+                <div
+                  class="builder-readonly-trait"
+                  [class.is-active]="!!character().resistances.poison"
+                >
+                  <span>Poison resistance</span
+                  ><strong
+                    >{{ character().resistances.poison ? 'Active' : '—'
+                    }}</strong
+                  >
+                </div>
+                <div
+                  class="builder-readonly-trait"
+                  [class.is-active]="!!character().immunities.poison"
+                >
+                  <span>Poison immunity</span
+                  ><strong
+                    >{{ character().immunities.poison ? 'Active' : '—'
+                    }}</strong
+                  >
+                </div>
+                <div
+                  class="builder-readonly-trait"
+                  [class.is-active]="!!character().immunities.magicalSleep"
+                >
+                  <span>Magical sleep immunity</span
+                  ><strong
+                    >{{ character().immunities.magicalSleep ? 'Active' : '—'
+                    }}</strong
+                  >
+                </div>
+                <div
+                  class="builder-readonly-trait"
+                  [class.is-active]="!!character().advantages.deathSaves"
+                >
+                  <span>Death-save advantage</span
+                  ><strong
+                    >{{ character().advantages.deathSaves ? 'Active' : '—'
+                    }}</strong
+                  >
+                </div>
+                <div
+                  class="builder-readonly-trait"
+                  [class.is-active]="!!character().advantages.diseasePoison"
+                >
+                  <span>Disease & poison advantage</span
+                  ><strong
+                    >{{ character().advantages.diseasePoison ? 'Active' : '—'
+                    }}</strong
+                  >
+                </div>
+              </div>
+            </div>
+          </details>
+          } @case ('abilities') {
+          <section
+            class="builder-derived-strip"
+            aria-label="Derived ability and sense statistics"
+          >
+            <div>
+              <small>Initiative</small
+              ><strong>{{ formatModifier(character().initiative) }}</strong>
+            </div>
+            <div>
+              <small>Perception</small
+              ><strong>{{ character().passives.perception }}</strong>
+            </div>
+            <div>
+              <small>Investigation</small
+              ><strong>{{ character().passives.investigation }}</strong>
+            </div>
+            <div>
+              <small>Insight</small
+              ><strong>{{ character().passives.insight }}</strong>
+            </div>
+          </section>
+
+          <div class="builder-ability-editor">
+            @for (ability of abilities; track ability.key) {
+            <article>
+              <header>
+                <span>{{ ability.short }}</span>
+                <h3>{{ ability.label }}</h3>
+                <strong
+                  >{{ formatModifier(character().abilityModifiers[ability.key])
+                  }}</strong
+                >
+              </header>
+              <div class="builder-ability-fields">
+                <label class="builder-field">
+                  <span>Base score</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="20"
+                    [ngModel]="character().rolledStats[ability.key]"
+                    (change)="updateBaseAbility(ability.key, $any($event.target).value)"
+                  />
+                </label>
+                <label class="builder-field">
+                  <span>Explicit override</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="30"
+                    placeholder="—"
+                    [ngModel]="character().overrideAbilityScores[ability.key] ?? null"
+                    (change)="updateAbilityOverride(ability.key, $any($event.target).value)"
+                  />
+                </label>
+              </div>
+              <dl>
+                <div>
+                  <dt>Racial</dt>
+                  <dd>
+                    {{ formatModifier(character().racialAsis[ability.key] ?? 0)
+                    }}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Feat</dt>
+                  <dd>{{ formatModifier(featContribution(ability.key)) }}</dd>
+                </div>
+                <div>
+                  <dt>ASI</dt>
+                  <dd>{{ formatModifier(asiContribution(ability.key)) }}</dd>
+                </div>
+                <div>
+                  <dt>Gear override</dt>
+                  <dd>{{ equipmentOverride(ability.key) ?? '—' }}</dd>
+                </div>
+              </dl>
+              <footer>
+                <span>Final score</span
+                ><strong>{{ character().abilityScores[ability.key] }}</strong>
+              </footer>
+            </article>
+            }
+          </div>
+          } @case ('equipment') {
+          <section class="builder-equipment-summary">
+            <div>
+              <small>Weight carried</small
+              ><strong
+                >{{ carriedWeight() | number: '1.0-2' }} <i>lb.</i></strong
+              >
+            </div>
+            <div>
+              <small>Item quantity</small
+              ><strong>{{ inventoryQuantity() }}</strong>
+            </div>
+            <div>
+              <small>Attuned</small><strong>{{ attunedCount() }}</strong>
+            </div>
+            <div>
+              <small>Coin value</small
+              ><strong
+                >{{ coinGoldEquivalent() | number: '1.0-2' }} <i>GP</i></strong
+              >
+            </div>
+          </section>
+
+          <section class="builder-equipment-toolbar">
+            <label>
+              <span aria-hidden="true">⌕</span>
+              <span class="sr-only">Search inventory</span>
+              <input
+                type="search"
+                placeholder="Search item names, categories, or notes"
+                [ngModel]="inventorySearch()"
+                (ngModelChange)="inventorySearch.set($event)"
+              />
+            </label>
+            <div role="group" aria-label="Inventory filters">
+              @for (filter of ['all', 'equipped', 'attunement', 'unequipped'];
+              track filter) {
+              <button
+                type="button"
+                [class.is-active]="inventoryFilter() === filter"
+                [attr.aria-pressed]="inventoryFilter() === filter"
+                (click)="inventoryFilter.set($any(filter))"
+              >
+                {{ filter | titlecase }}
+              </button>
+              }
+            </div>
+            <button
+              type="button"
+              class="builder-add-item"
+              (click)="addInventoryItem()"
+            >
+              ＋ Add item
+            </button>
+          </section>
+
+          <div class="builder-inventory-list">
+            @for (group of inventoryGroups(); track group.id) {
+            <section class="builder-inventory-group">
+              <header>
+                <h3>
+                  {{ group.label }} <span>({{ group.items.length }})</span>
+                </h3>
+                <strong
+                  >{{ inventoryWeight(group.items) | number: '1.0-2' }}
+                  lb.</strong
+                >
+              </header>
+              @for (item of group.items; track trackInventoryItem($index, item))
+              {
+              <details class="builder-inventory-item">
+                <summary>
+                  <span
+                    class="builder-item-active"
+                    [class.is-equipped]="item.equipped"
+                    ><span aria-hidden="true"
+                      >{{ item.equipped ? '■' : '□' }}</span
+                    ><span class="sr-only"
+                      >{{ item.equipped ? 'Equipped' : 'Not equipped' }}</span
+                    ></span
+                  >
+                  <span class="builder-item-name"
+                    ><b>{{ item.name }}</b
+                    ><small
+                      >{{ item.category || 'Gear' }} @if (item.isAttuned) { ·
+                      Attuned }</small
+                    ></span
+                  >
+                  <span class="builder-item-metric"
+                    ><b>{{ item.qty }}</b><small>Qty</small></span
+                  >
+                  <span class="builder-item-metric"
+                    ><b>{{ item.weight }}</b><small>Weight</small></span
+                  >
+                  <i aria-hidden="true"></i>
+                </summary>
+                <div class="builder-inventory-editor">
+                  <div class="builder-inventory-fields">
+                    <label class="builder-field is-wide"
+                      ><span>Name</span
+                      ><input
+                        [ngModel]="item.name"
+                        (change)="updateInventoryField(item, 'name', $any($event.target).value)"
+                    /></label>
+                    <label class="builder-field"
+                      ><span>Category</span
+                      ><input
+                        [ngModel]="item.category"
+                        (change)="updateInventoryField(item, 'category', $any($event.target).value)"
+                    /></label>
+                    <label class="builder-field"
+                      ><span>Quantity</span
+                      ><input
+                        type="number"
+                        min="0"
+                        [ngModel]="item.qty"
+                        (change)="updateInventoryNumber(item, 'qty', $any($event.target).value)"
+                    /></label>
+                    <label class="builder-field"
+                      ><span>Weight</span
+                      ><input
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        [ngModel]="item.weight"
+                        (change)="updateInventoryNumber(item, 'weight', $any($event.target).value)"
+                    /></label>
+                    <label class="builder-field"
+                      ><span>Value · GP</span
+                      ><input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        [ngModel]="item.value"
+                        (change)="updateInventoryNumber(item, 'value', $any($event.target).value)"
+                    /></label>
+                    <label class="builder-field is-wide"
+                      ><span>Notes</span
+                      ><textarea
+                        rows="3"
+                        [ngModel]="item.notes"
+                        (change)="updateInventoryField(item, 'notes', $any($event.target).value)"
+                      ></textarea>
+                    </label>
+                  </div>
+                  <div class="builder-item-toggles">
+                    <label class="builder-check"
+                      ><input
+                        type="checkbox"
+                        [checked]="item.equipped"
+                        (change)="updateInventoryField(item, 'equipped', checked($event))"
+                      /><span><b>Equipped</b>Active on sheet</span></label
+                    >
+                    <label class="builder-check"
+                      ><input
+                        type="checkbox"
+                        [checked]="item.requiresAttunement"
+                        (change)="updateInventoryField(item, 'requiresAttunement', checked($event))"
+                      /><span
+                        ><b>Requires attunement</b>Uses an attunement slot</span
+                      ></label
+                    >
+                    <label class="builder-check"
+                      ><input
+                        type="checkbox"
+                        [disabled]="!item.requiresAttunement"
+                        [checked]="item.isAttuned"
+                        (change)="updateInventoryField(item, 'isAttuned', checked($event))"
+                      /><span><b>Attuned</b>Benefits are active</span></label
+                    >
+                  </div>
+                  <button
+                    type="button"
+                    class="builder-remove-item"
+                    (click)="requestInventoryRemoval(item, $event.currentTarget)"
+                  >
+                    Remove item…
+                  </button>
+                </div>
+              </details>
+              }
+            </section>
+            } @empty {
+            <div class="builder-empty-state">
+              <span aria-hidden="true">◇</span>
+              <h3>No matching items</h3>
+              <p>Try a different search or add a new item.</p>
+            </div>
+            }
+          </div>
+
+          <label class="builder-field builder-additional-inventory">
+            <span>Additional inventory notes</span>
+            <textarea
+              rows="5"
+              [ngModel]="character().additionalInventory"
+              (change)="characterService.modAdditionalInventory($any($event.target).value)"
+            ></textarea>
+          </label>
+
+          <details class="builder-disclosure">
+            <summary>
+              <span><b>Armor calculation</b></span
+              ><i aria-hidden="true"></i>
+            </summary>
+            <div class="builder-disclosure__body">
+              <label class="builder-field builder-field--medium">
+                <span>Equipped armor type</span>
+                <select
+                  [ngModel]="character().equippedArmourType"
+                  (ngModelChange)="characterService.setEquippedArmourType($event)"
+                >
+                  <option value="None">None</option>
+                  <option value="Padded">Padded</option>
+                  <option value="Leather">Leather</option>
+                  <option value="Studded Leather">Studded Leather</option>
+                  <option value="Hide">Hide</option>
+                  <option value="Chain Shirt">Chain Shirt</option>
+                  <option value="Scale Mail">Scale Mail</option>
+                  <option value="Breastplate">Breastplate</option>
+                  <option value="Half Plate">Half Plate</option>
+                  <option value="Chain Mail">Chain Mail</option>
+                  <option value="Splint">Splint</option>
+                  <option value="Plate">Plate</option>
+                </select>
+              </label>
+            </div>
+          </details>
+          } @case ('next') {
+          <section
+            class="builder-readiness"
+            [class.has-warnings]="reviewWarnings().length"
+          >
+            <span aria-hidden="true"
+              >{{ reviewWarnings().length ? '!' : '✓' }}</span
+            >
+            <div>
+              <h3>
+                {{ reviewWarnings().length ? 'A few details need attention' :
+                'Vasha is ready to play' }}
+              </h3>
+              @if (reviewWarnings().length) {
+              <ul>
+                @for (warning of reviewWarnings(); track warning) {
+                <li>{{ warning }}</li>
+                }
+              </ul>
+              }
+            </div>
+          </section>
+
+          <div class="builder-review-grid">
+            <button type="button" (click)="setStep('home')">
+              <small>Identity</small><strong>{{ character().name }}</strong
+              ><span
+                >{{ character().alignment }} · {{ character().background
+                }}</span
+              >
+            </button>
+            <button type="button" (click)="setStep('class')">
+              <small>Class</small
+              ><strong
+                >{{ character().classes[0].class }} {{ character().totalLevel
+                }}</strong
+              ><span
+                >{{ character().classes[0].subclass }} · d{{
+                character().classes[0].hitDie }}</span
+              >
+            </button>
+            <button type="button" (click)="setStep('species')">
+              <small>Species</small><strong>{{ character().race }}</strong
+              ><span
+                >{{ character().speeds.land }} walking · {{
+                character().languages.length }} languages</span
+              >
+            </button>
+            <button type="button" (click)="setStep('abilities')">
+              <small>Abilities</small
+              ><strong
+                >{{ character().abilityScores.Strength }} · {{
+                character().abilityScores.Dexterity }} · {{
+                character().abilityScores.Constitution }} · {{
+                character().abilityScores.Intelligence }} · {{
+                character().abilityScores.Wisdom }} · {{
+                character().abilityScores.Charisma }}</strong
+              ><span>STR · DEX · CON · INT · WIS · CHA</span>
+            </button>
+            <button type="button" (click)="setStep('equipment')">
+              <small>Equipment</small
+              ><strong
+                >{{ inventoryQuantity() }} carried · {{ attunedCount() }}
+                attuned</strong
+              ><span
+                >{{ carriedWeight() | number: '1.0-2' }} lb. · {{
+                coinGoldEquivalent() | number: '1.0-2' }} GP</span
+              >
+            </button>
+            <article>
+              <small>Combat summary</small>
+              <div>
+                <span><b>{{ character().totalMaxHP }}</b>HP</span
+                ><span><b>{{ character().ac }}</b>AC</span
+                ><span
+                  ><b>{{ formatModifier(character().initiative) }}</b
+                  >Initiative</span
+                ><span><b>{{ character().spellSaveDC }}</b>Spell save</span>
+              </div>
+            </article>
+          </div>
+
+          <section class="builder-launch-panel">
+            <a routerLink="/new-view"
+              >Open play sheet <span aria-hidden="true">→</span></a
+            >
+            <a class="is-secondary" routerLink="/stats">Open classic sheet</a>
+          </section>
+          } }
+        </article>
+
+        <footer class="builder-footer-nav">
+          <button
+            type="button"
+            [disabled]="!previousStep()"
+            (click)="goPrevious()"
+          >
+            <span aria-hidden="true">←</span>
+            <small>Previous</small>
+            <strong>{{ previousStep()?.shortLabel || 'Start' }}</strong>
+          </button>
+          <div>
+            <span>{{ currentStepIndex() + 1 }} of {{ steps.length }}</span
+            ><i
+              ><b
+                [style.width.%]="((currentStepIndex() + 1) / steps.length) * 100"
+              ></b
+            ></i>
+          </div>
+          @if (nextStep()) {
+          <button type="button" class="is-next" (click)="goNext()">
+            <small>Next</small><strong>{{ nextStep()?.shortLabel }}</strong
+            ><span aria-hidden="true">→</span>
+          </button>
+          } @else {
+          <a class="builder-finish-link" routerLink="/new-view"
+            ><small>Finished</small><strong>Play Vasha</strong
+            ><span aria-hidden="true">→</span></a
+          >
+          }
+        </footer>
+      </section>
+    </div>
+  </div>
+
+  @if (inventoryRemoval(); as item) {
+  <div
+    class="builder-modal-backdrop"
+    aria-hidden="true"
+    (click)="cancelInventoryRemoval()"
+  ></div>
+  <section
+    class="builder-confirm-modal"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="remove-item-title"
+    aria-describedby="remove-item-copy"
+    cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true"
+  >
+    <span aria-hidden="true">!</span>
+    <h2 id="remove-item-title">Remove {{ item.name }}?</h2>
+    <p id="remove-item-copy">
+      This removes the item from Vasha’s locally saved inventory. The action
+      cannot be undone.
+    </p>
+    <div>
+      <button type="button" cdkFocusInitial (click)="cancelInventoryRemoval()">
+        Cancel</button
+      ><button
+        type="button"
+        class="is-danger"
+        (click)="confirmInventoryRemoval()"
+      >
+        Remove item
+      </button>
+    </div>
+  </section>
+  }
+</main>

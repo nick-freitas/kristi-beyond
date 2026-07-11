@@ -10,6 +10,20 @@ import { TarotComponent } from './tarot/tarot.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'stats' },
+  {
+    path: 'new-view',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./new-view/new-view.page').then((page) => page.NewViewPage),
+  },
+  {
+    path: 'modify-character',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./modify-character/modify-character.page').then(
+        (page) => page.ModifyCharacterPage,
+      ),
+  },
   { path: 'stats', pathMatch: 'full', component: StatsPages },
   { path: 'abilities', pathMatch: 'full', component: AbilitiesPage },
   { path: 'actions', pathMatch: 'full', component: ActionsComponent },
