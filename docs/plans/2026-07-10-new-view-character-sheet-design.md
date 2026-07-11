@@ -1,7 +1,7 @@
 # Standalone Character Sheet View
 
 **Date:** 2026-07-10  
-**Status:** Approved design  
+**Status:** Approved functional design; visual direction superseded by `2026-07-10-new-view-ddb-visual-redesign-design.md`
 **Route:** `/new-view`
 
 ## Purpose
@@ -41,16 +41,7 @@ The information architecture follows the supplied D&D Beyond screenshots: a pers
 
 ## Visual direction
 
-The page should feel like an **oracle's field dossier**: pale vellum surfaces, charcoal structural lines, restrained oxblood accents, aged-brass details, and subtle cartographic or card-line textures. Typography should pair a condensed, authoritative display face with a highly readable text face. The result should feel tactile and purpose-built for play, not like a generic dashboard or a purple gradient fantasy template.
-
-The screenshots determine the layout rhythm and hierarchy, not the brand treatment:
-
-- dense persistent statistics;
-- strong outlined containers;
-- a dark character header;
-- a large working panel;
-- slide-over management surfaces;
-- high-contrast, touch-sized controls.
+The original visual direction in this section has been superseded. The supplied screenshots determine both the layout and the visual language. See `2026-07-10-new-view-ddb-visual-redesign-design.md` for the approved close visual translation.
 
 ## Information architecture
 
@@ -111,6 +102,7 @@ On narrower layouts the reference rails become collapsible sections above the wo
 The workspace changes content without changing routes. Its top-level tabs are:
 
 1. **Actions**
+
    - attacks and equipped weapons;
    - cantrips and spell-like actions;
    - Draw Card;
@@ -120,6 +112,7 @@ The workspace changes content without changing routes. Its top-level tabs are:
    - feature-use controls relevant during play.
 
 2. **Cards & Tarot**
+
    - current deck first;
    - cards outside the deck second;
    - search and level filters;
@@ -128,6 +121,7 @@ The workspace changes content without changing routes. Its top-level tabs are:
    - clear visual distinction between game effects and readings.
 
 3. **Inventory**
+
    - equipped equipment summary;
    - all inventory items;
    - equip/unequip;
@@ -137,6 +131,7 @@ The workspace changes content without changing routes. Its top-level tabs are:
    - wealth and wealth adjustments.
 
 4. **Features & Traits**
+
    - Wild Oracle class features;
    - Fate of the Chosen subclass features;
    - Reborn racial traits;
